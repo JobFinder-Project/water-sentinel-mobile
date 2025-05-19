@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/tvWelcome"
-        android:text="Bem-vindo!"
+        android:text="@string/bemVindo"
         android:textSize="28sp"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
@@ -19,7 +19,7 @@
 
     <TextView
         android:id="@+id/tvSubtitle"
-        android:text="Monitoramento de Alagamentos em Itacoatiara"
+        android:text="@string/subtitulo"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:layout_marginBottom="32dp"
@@ -28,7 +28,7 @@
 
     <Button
         android:id="@+id/btnEnter"
-        android:text="Entrar"
+        android:text="@string/entrar"
         android:textColor="#0077CC"
         android:backgroundTint="#FFFFFF"
         android:layout_width="wrap_content"
