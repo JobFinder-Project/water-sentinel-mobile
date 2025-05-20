@@ -5,4 +5,15 @@
     <string name="entrar">Entrar</string>
     <string name="subtitulo">Monitoramento de Alagamentos em Itacoatiara</string>
     <string name="bemVindo">Bem-vindo!</string>
+
+    <!-- 2° tela -->
+
+    <string name="itacoatiara">Itacoatiara</string>
+    <string name="sistema_inativo">Sistema Inativo</string>
+    <string name="sem_temperatura">--°</string>
+    <string name="risco_de_alagamento">Risco de Alagamento</string>
+    <string name="sem_risco_alagamento">--%</string>
+    <string name="vento">--mm/h</string>
+    <string name="umidade">Umidade</string>
+    <string name="sem_pressao">---</string>
 </resources>

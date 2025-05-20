@@ -2,4 +2,29 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Fundo principal (degradê azul) -->
+    <color name="background">#4852A8</color> <!-- Azul mais escuro -->
+    <color name="background_end">#5D74D6</color>   <!-- Azul mais claro -->
+
+    <!-- Cartões e containers -->
+    <color name="card_background">#FFFFFFFF</color> <!-- Branco -->
+
+    <!-- Texto principal -->
+    <color name="text_primary">#FFFFFFFF</color> <!-- Branco -->
+    <color name="text_secondary">#B3FFFFFF</color> <!-- Branco 70% -->
+    <color name="text_black">#FF222222</color> <!-- Preto suave -->
+
+    <!-- Ícones e indicadores -->
+
+    <color name="yellow">#FFD600</color> <!-- Amarelo para alerta médio -->
+    <color name="blue">#5D74D6</color>   <!-- Azul para ícones neutros -->
+
+    <!-- Cores de alerta/níveis -->
+    <color name="alert_low">#4CAF50</color>   <!-- Verde (baixo) -->
+    <color name="alert_medium">#FFD600</color> <!-- Amarelo (médio) -->
+    <color name="alert_high">#F44336</color>  <!-- Vermelho (alto) -->
+
+    <!-- Outros -->
+    <color name="divider">#1FFFFFFF</color> <!-- Branco 12% para divisores -->
+    <color name="gray_card">#F1F3F4</color> <!-- Cinza claro para cards secundários -->
 </resources>
