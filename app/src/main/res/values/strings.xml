@@ -16,4 +16,6 @@
     <string name="vento">--mm/h</string>
     <string name="umidade">Umidade</string>
     <string name="sem_pressao">---</string>
+    <string name="pressao">Pressão</string>
+    <string name="precipitaco">Precipitação</string>
 </resources>

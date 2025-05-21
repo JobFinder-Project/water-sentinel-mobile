@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@drawable/background_gradient"
     android:id="@+id/main"
     tools:context=".DashboardActivity">
 
@@ -170,7 +170,7 @@ android:layout_marginEnd="16dp">
         android:id="@+id/tv_humidity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="75%"
+        android:text="--%"
         android:textColor="@color/white"
         android:textSize="14sp"/>
     <TextView
@@ -192,16 +192,18 @@ android:layout_marginEnd="16dp">
         android:layout_width="24dp"
         android:layout_height="24dp"
         app:tint="@color/white" />
+
     <TextView
         android:id="@+id/tv_pressure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/sem_pressao"
         android:textColor="@color/white"
-        android:textSize="14sp"/>
+        android:textSize="14sp" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/pressao"
         android:textColor="@color/white"
         android:textSize="12sp"/>
 </LinearLayout>
@@ -221,13 +223,13 @@ android:layout_marginEnd="16dp">
         android:id="@+id/tv_precipitation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="6.5mm"
+        android:text="0.0 mm"
         android:textColor="@color/white"
         android:textSize="14sp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Precipitação"
+        android:text="@string/precipitaco"
         android:textColor="@color/white"
         android:textSize="12sp"/>
 </LinearLayout>
