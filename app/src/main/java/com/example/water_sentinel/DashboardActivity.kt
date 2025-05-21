@@ -17,18 +17,22 @@ class DashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_dashboard)
+        // Identifica os elementos da interface
         val txtTemp = findViewById<TextView>(R.id.tv_temperature)
         getTemp(txtTemp)
+
+        val txtUmi = findViewById<TextView>(R.id.tv_humidity)
+        getUmi(txtUmi)
     }
 
     // Função que acessa a temperatura no Firebase
     fun getTemp(txtTemp: TextView) {
 
-        // Configuração do Banco de Dados
+        // Declara o caminho do dado
         val database = Firebase.database
-        val myRef = database.getReference("sensor/dht/temperatura1")
+        val myRefTemp = database.getReference("sensor/dht/temperatura")
 
-        myRef.addValueEventListener(object : ValueEventListener {
+        myRefTemp.addValueEventListener(object : ValueEventListener {
             // Busca o dado toda vez que for alterado
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val temperatura = dataSnapshot.getValue<Float>()
@@ -39,6 +43,31 @@ class DashboardActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {
                 Log.e("Firebase", "Erro ao ler dados", error.toException())
             }
+        })}
+
+    // Função que acessa a umidade no Firebase
+    fun getUmi(txtUmi: TextView) {
+
+        // Declara o caminho do dado
+        val database = Firebase.database
+        val myRefUmi = database.getReference("sensor/dht/umidade")
+
+        myRefUmi.addValueEventListener(object : ValueEventListener {
+            // Busca o dado toda vez que for alterado
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val umidade = dataSnapshot.getValue<Float>()
+                txtUmi.text = "$umidade%"
+            }
+            // Função que trata algum erro
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Erro ao ler dados", error.toException())
+            }
         })
     }
+
+        //val button = findViewById<Button>(R.id.btnMap)
+        //button.setOnClickListener {
+            //val intent = Intent(this, MapsActivity::class.java)
+            //startActivity(intent)
+        //}
 }

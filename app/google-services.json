@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "698934917307",
-    "firebase_url": "https://water-sentinel-iot-default-rtdb.firebaseio.com",
-    "project_id": "water-sentinel-iot",
-    "storage_bucket": "water-sentinel-iot.firebasestorage.app"
+    "project_number": "1003262813791",
+    "firebase_url": "https://water-sentinel-app-default-rtdb.firebaseio.com",
+    "project_id": "water-sentinel-app",
+    "storage_bucket": "water-sentinel-app.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:698934917307:android:86b633bfd3288216d2119e",
+        "mobilesdk_app_id": "1:1003262813791:android:35aa01b7421f5c3ca5ddea",
         "android_client_info": {
           "package_name": "com.example.water_sentinel"
         }

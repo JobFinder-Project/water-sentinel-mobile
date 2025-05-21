@@ -227,12 +227,15 @@ android:layout_marginEnd="16dp">
         android:textColor="@color/white"
         android:textSize="14sp"/>
     <TextView
+        android:id="@+id/txt_pressao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/precipitaco"
         android:textColor="@color/white"
         android:textSize="12sp"/>
 </LinearLayout>
+
 </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
