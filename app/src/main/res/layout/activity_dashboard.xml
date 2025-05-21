@@ -65,77 +65,79 @@ android:layout_marginTop="2dp"/>
 
     <!-- Card: Risco de Alagamento -->
 <com.google.android.material.card.MaterialCardView
-android:id="@+id/card_flood_risk"
-android:layout_width="0dp"
-android:layout_height="wrap_content"
-app:cardCornerRadius="12dp"
-app:cardElevation="4dp"
-app:layout_constraintTop_toBottomOf="@id/tv_max_min"
-app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-android:layout_marginTop="16dp"
-android:layout_marginStart="16dp"
-android:layout_marginEnd="16dp">
-
-<LinearLayout
-    android:layout_width="match_parent"
+    android:id="@+id/card_flood_risk"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="16dp"
-    android:gravity="center_vertical">
-
-    <TextView
-        android:id="@+id/tv_flood_risk_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/risco_de_alagamento"
-        android:textColor="@color/black"
-        android:textStyle="bold"
-        android:textSize="16sp"/>
-
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_weight="1"/>
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:layout_constraintTop_toBottomOf="@id/tv_max_min"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@color/white">
 
         <TextView
-            android:id="@+id/tv_flood_percent"
+            android:id="@+id/tv_flood_risk_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sem_risco_alagamento"
-            android:textColor="@color/yellow"
-            android:textStyle="bold"
-            android:textSize="16sp"/>
+            android:text="@string/risco_de_alagamento"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tv_flood_level"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="@color/yellow"
-            android:textSize="14sp"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="@color/white"/>
 
-        <TextView
-            android:id="@+id/tv_flood_mm"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/vento"
-            android:textColor="@color/yellow"
-            android:textSize="14sp"/>
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_flood_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sem_risco_alagamento"
+                android:textColor="@color/yellow"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_flood_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@color/yellow"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_flood_mm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/vento"
+                android:textColor="@color/yellow"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            app:tint="@color/yellow" />
     </LinearLayout>
-
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
-        app:tint="@color/yellow" />
-</LinearLayout>
 </com.google.android.material.card.MaterialCardView>
 
     <!-- Linha de informações: Umidade, Pressão, Precipitação -->
