@@ -9,7 +9,7 @@
     <!-- 2° tela -->
 
     <string name="itacoatiara">Itacoatiara</string>
-    <string name="sistema_inativo">Sistema Inativo</string>
+    <string name="sistema_inativo">----</string>
     <string name="sem_temperatura">--°</string>
     <string name="risco_de_alagamento">Risco de Alagamento</string>
     <string name="sem_risco_alagamento">--%</string>
