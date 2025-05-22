@@ -10,12 +10,12 @@
             android:endColor="#4852A8"
             android:angle="270"/> -->
 
-        <!-- Very Blue-->
+        <!-- Very Blue
         <gradient
             android:startColor="#0575E6"
             android:endColor="#021B79"
             android:angle="270"
-        />
+        />-->
 
         <!-- Blue Skies
         <gradient
@@ -31,14 +31,14 @@
                 android:angle="270"
             />-->
 
-        <!-- Cool Sky
+        <!-- Cool Sky-->
 
             <gradient
                 android:startColor="#2980B9"
                 android:centerColor="#6DD5FA"
                 android:endColor="#FFFFFF"
                 android:angle="270"
-            />-->
+            />
 
 
 

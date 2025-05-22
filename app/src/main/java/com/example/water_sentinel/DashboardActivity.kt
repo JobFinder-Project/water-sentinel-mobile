@@ -35,7 +35,7 @@ class DashboardActivity : AppCompatActivity() {
         myRefTemp.addValueEventListener(object : ValueEventListener {
             // Busca o dado toda vez que for alterado
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val temperatura = dataSnapshot.getValue<Float>()
+                val temperatura = dataSnapshot.getValue<Int>()
                 txtTemp.text = "$temperatura°C"
 
             }
