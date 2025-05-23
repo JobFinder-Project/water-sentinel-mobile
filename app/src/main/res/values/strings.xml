@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Water-Sentinel</string>
 
+    <!-- Notificações -->
+    <string name="channel_name">Alertas do Sistema</string>
+
     <!-- 1° tela -->
     <string name="entrar">Entrar</string>
     <string name="subtitulo">Monitoramento de Alagamentos em Itacoatiara</string>
