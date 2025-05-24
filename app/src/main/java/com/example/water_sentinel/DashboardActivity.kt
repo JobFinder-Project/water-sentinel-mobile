@@ -57,34 +57,24 @@ class DashboardActivity : AppCompatActivity() {
         val txtPressao = findViewById<TextView>(R.id.tv_pressure)
 
         // Declara o caminho dos dados do sensor DHT
-        val refDht = database.getReference("sensor/dht/")
+        val refDht = database.getReference("sensor/data/")
 
         refDht.addValueEventListener(object : ValueEventListener {
             // Busca temperatura e umidade toda vez que for alterado
             override fun onDataChange(snapshot: DataSnapshot) {
-                val temperatura = snapshot.child("temperatura").getValue<Int>()
-                txtTemp.text = "$temperatura°C"
+                val temperatura = snapshot.child("temperatura").getValue<Float>()
+                txtTemp.text = "%.1f°C".format(temperatura).replace('.', ',')
 
                 val umidade = snapshot.child("umidade").getValue<Int>()
                 txtUmi.text = "$umidade%"
 
+                val pressao = snapshot.child("pressao").getValue<Float>()
+                txtPressao.text = "%.1f hPa".format(pressao).replace('.',',')
+
             }
             // Função que trata algum erro
             override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Erro ao ler dados do sensor DHT", error.toException())
-            }
-        })
-
-        val refPressao = database.getReference("sensor/bpm180/pressao")
-
-        refPressao.addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val pressao = snapshot.getValue<Int>()
-                txtPressao.text = "$pressao Pas"
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Erro ao ler a pressão", error.toException())
+                Log.e("Firebase", "Erro ao ler dados", error.toException())
             }
         })
     }
