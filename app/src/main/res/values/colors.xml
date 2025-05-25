@@ -27,4 +27,6 @@
     <!-- Outros -->
     <color name="divider">#1FFFFFFF</color> <!-- Branco 12% para divisores -->
     <color name="gray_card">#F1F3F4</color> <!-- Cinza claro para cards secundários -->
+    <color name="design_green">#34A853</color>
+    <color name="item_background_color">#3E4E8B</color>
 </resources>

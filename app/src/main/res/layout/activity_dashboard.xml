@@ -9,235 +9,300 @@
     android:id="@+id/main"
     tools:context=".DashboardActivity">
 
-<!-- Localização -->
-
-    <!-- Temperatura -->
 
     <TextView
         android:id="@+id/tv_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="35dp"
         android:text="@string/itacoatiara"
         android:textColor="@color/white"
-
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-android:id="@+id/tv_temperature"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="@string/sem_temperatura"
-android:textColor="@color/white"
-android:textSize="56sp"
-android:textStyle="bold"
-app:layout_constraintTop_toBottomOf="@id/tv_location"
-app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-android:layout_marginTop="8dp"/>
+        android:id="@+id/tv_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:text="@string/sem_temperatura"
+        android:textColor="@color/white"
+        android:textSize="56sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_location" />
 
-    <!-- Descrição do clima -->
-<TextView
-android:id="@+id/tv_weather_desc"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="@string/sistema_inativo"
-android:textColor="@color/white"
-android:textSize="16sp"
-app:layout_constraintTop_toBottomOf="@id/tv_temperature"
-app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-android:layout_marginTop="4dp"/>
+    <TextView
+        android:id="@+id/tv_weather_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sistema_inativo"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:gravity="center"
+        app:flow_verticalAlign="center"
+        app:layout_constraintTop_toBottomOf="@id/tv_temperature"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="4dp"/>
 
-    <!-- Máxima e mínima -->
-<TextView
-android:id="@+id/tv_max_min"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="Max:--°  Min:--°"
-android:textColor="@color/white"
-android:textSize="14sp"
-app:layout_constraintTop_toBottomOf="@id/tv_weather_desc"
-app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-android:layout_marginTop="2dp"/>
+    <!--<TextView
+        android:id="@+id/tv_max_min"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:text="Max:- -°  Min:- -°"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_weather_desc" />-->
 
-    <!-- Card: Risco de Alagamento -->
-<com.google.android.material.card.MaterialCardView
-    android:id="@+id/card_flood_risk"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    app:layout_constraintTop_toBottomOf="@id/tv_max_min"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:layout_marginTop="16dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp">
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_flood_risk"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/tv_weather_desc"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tv_flood_risk_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/risco_de_alagamento"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <LinearLayout
+                android:id="@+id/ll_flood_details_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="15dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_flood_risk_label"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="5dp"
+                android:gravity="bottom">
+
+                <TextView
+                    android:id="@+id/tv_flood_percent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:text="@string/porcentagem"
+                    android:textColor="@color/design_green"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="@id/tv_flood_risk_label"/>
+
+                <LinearLayout
+                    android:id="@+id/ll_risk_mm_vertical_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView
+                        android:id="@+id/tv_flood_risk_level_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/baixo"
+                        android:textColor="@color/design_green"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@id/tv_flood_level"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/volume"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="14sp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="12dp"/> </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/img_flood_icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/gota"
+                android:layout_marginBottom="25dp"
+                app:tint="@color/design_green"
+                android:foregroundGravity="center"
+                android:contentDescription="@string/risco_de_alagamento"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/ll_flood_details_group"
+                app:layout_constraintBottom_toBottomOf="@id/ll_flood_details_group"
+                app:layout_constraintStart_toEndOf="@id/ll_flood_details_group"
+                android:layout_marginStart="85dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:id="@+id/ll_ifo_row"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="125dp"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="@color/white">
-
-        <TextView
-            android:id="@+id/tv_flood_risk_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/risco_de_alagamento"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:background="@color/white"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_flood_risk"
+        app:layout_constraintVertical_bias="1.0">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
 
+            <ImageView
+                android:id="@+id/img_humidity_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/umidade"
+                android:src="@drawable/gota"
+                app:tint="@color/white" />
+
             <TextView
-                android:id="@+id/tv_flood_percent"
+                android:id="@+id/tv_humidity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sem_risco_alagamento"
-                android:textColor="@color/yellow"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:text="--%"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/umidade"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/img_pressure_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/pressao"
+                android:src="@drawable/pressao"
+                app:tint="@color/white" />
+
+            <TextView
+                android:id="@+id/tv_pressure"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sem_pressao"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pressao"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/img_precipitation_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/precipitaco"
+                android:src="@drawable/rain_simples"
+                app:tint="@color/white" />
 
             <TextView
                 android:id="@+id/tv_flood_level"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="@color/yellow"
+                android:text="@string/sem_precipitacao"
+                android:textColor="@color/white"
                 android:textSize="14sp" />
 
             <TextView
-                android:id="@+id/tv_flood_mm"
+                android:id="@+id/txt_precipitation_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/vento"
-                android:textColor="@color/yellow"
-                android:textSize="14sp" />
+                android:text="@string/precipitaco"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
         </LinearLayout>
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="8dp"
-            app:tint="@color/yellow" />
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
 
-    <!-- Linha de informações: Umidade, Pressão, Precipitação -->
-<LinearLayout
-android:id="@+id/ll_info_row"
-android:layout_width="0dp"
-android:layout_height="wrap_content"
-android:orientation="horizontal"
-android:gravity="center"
-app:layout_constraintTop_toBottomOf="@id/card_flood_risk"
-app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-android:layout_marginTop="16dp"
-android:layout_marginStart="16dp"
-android:layout_marginEnd="16dp">
-
-<LinearLayout
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:orientation="vertical"
-    android:gravity="center">
-
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-
-        app:tint="@color/white" />
-    <TextView
-        android:id="@+id/tv_humidity"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/ll_simulation_buttons"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="--%"
-        android:textColor="@color/white"
-        android:textSize="14sp"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/umidade"
-        android:textColor="@color/white"
-        android:textSize="12sp"/>
-</LinearLayout>
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-<LinearLayout
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:orientation="vertical"
-    android:gravity="center">
+        <Button
+            android:id="@+id/btnSimularRiscoBaixo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Simular Risco Baixo"
+            android:layout_marginBottom="8dp"/>
 
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        app:tint="@color/white" />
+        <Button
+            android:id="@+id/btnSimularRiscoMedio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Simular Risco Médio"
+            android:layout_marginBottom="8dp"/>
 
-    <TextView
-        android:id="@+id/tv_pressure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/sem_pressao"
-        android:textColor="@color/white"
-        android:textSize="14sp" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/pressao"
-        android:textColor="@color/white"
-        android:textSize="12sp"/>
-</LinearLayout>
-
-<LinearLayout
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:orientation="vertical"
-    android:gravity="center">
-
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        app:tint="@color/white" />
-    <TextView
-        android:id="@+id/tv_precipitation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0.0 mm"
-        android:textColor="@color/white"
-        android:textSize="14sp"/>
-    <TextView
-        android:id="@+id/txt_pressao"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/precipitaco"
-        android:textColor="@color/white"
-        android:textSize="12sp"/>
-</LinearLayout>
-
-</LinearLayout>
-
+        <Button
+            android:id="@+id/btnSimularRiscoAlto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Simular Risco Alto"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

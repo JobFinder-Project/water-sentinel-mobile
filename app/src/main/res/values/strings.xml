@@ -16,9 +16,14 @@
     <string name="sem_temperatura">--°</string>
     <string name="risco_de_alagamento">Risco de Alagamento</string>
     <string name="sem_risco_alagamento">--%</string>
-    <string name="vento">--mm/h</string>
+    <string name="volume">--mm/h</string>
     <string name="umidade">Umidade</string>
     <string name="sem_pressao">---</string>
     <string name="pressao">Pressão</string>
     <string name="precipitaco">Precipitação</string>
+    <string name="sem_precipitacao">--</string>
+
+
+    <string name="porcentagem">--%</string>
+    <string name="baixo">Baixo Risco</string>
 </resources>

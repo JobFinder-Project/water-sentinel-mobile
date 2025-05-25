@@ -2,9 +2,11 @@ package com.example.water_sentinel
 
 import android.Manifest
 import android.app.AlertDialog
+import android.widget.Button
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -28,6 +31,7 @@ import java.time.format.DateTimeFormatter
 class DashboardActivity : AppCompatActivity() {
     companion object {
         private const val CODIGO_PERMISSAO_NOTIFICACAO = 1001
+        private const val TAG = "DashboardActivity" // Tag para logs
     }
     private val database = Firebase.database
 
@@ -35,12 +39,58 @@ class DashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_dashboard)
+        Log.d(TAG, "onCreate: Activity Criada")
 
-        criarCanalNotificacao()
+        //criarCanalNotificacao()
 
         solicitarPermissaoNotificacao()
 
         setupFirebaseListener()
+        // Encontrar os botões pelos IDs corretos do XML
+        val btnSimularBaixo: Button? = findViewById(R.id.btnSimularRiscoBaixo)
+        val btnSimularMedio: Button? = findViewById(R.id.btnSimularRiscoMedio)
+        val btnSimularAlto: Button? = findViewById(R.id.btnSimularRiscoAlto)
+
+        // Adicionar logs para verificar se os botões são encontrados
+        if (btnSimularBaixo == null) Log.e(TAG, "Botão btnSimularRiscoBaixo NÃO encontrado!") else Log.d(TAG, "Botão btnSimularRiscoBaixo encontrado.")
+        if (btnSimularMedio == null) Log.e(TAG, "Botão btnSimularRiscoMedio NÃO encontrado!") else Log.d(TAG, "Botão btnSimularRiscoMedio encontrado.")
+        if (btnSimularAlto == null) Log.e(TAG, "Botão btnSimularRiscoAlto NÃO encontrado!") else Log.d(TAG, "Botão btnSimularRiscoAlto encontrado.")
+
+        btnSimularBaixo?.setOnClickListener {
+            Log.d(TAG, "Botão Simular Risco Baixo CLICADO")
+            if (checkNotificationPermission()) {
+                NotificationHelper.simulateLowRisk(this)
+            } else {
+                Log.w(TAG, "Permissão de notificação não concedida. Não é possível enviar Risco Baixo.")
+                Toast.makeText(this, "Permissão de notificação necessária.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        btnSimularMedio?.setOnClickListener {
+            Log.d(TAG, "Botão Simular Risco Médio CLICADO")
+            if (checkNotificationPermission()) {
+                NotificationHelper.simulateMediumRisk(this)
+            } else {
+                Log.w(TAG, "Permissão de notificação não concedida. Não é possível enviar Risco Médio.")
+                Toast.makeText(this, "Permissão de notificação necessária.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        btnSimularAlto?.setOnClickListener {
+            Log.d(TAG, "Botão Simular Risco Alto CLICADO")
+            if (checkNotificationPermission()) {
+                NotificationHelper.simulateHighRisk(this)
+            } else {
+                Log.w(TAG, "Permissão de notificação não concedida. Não é possível enviar Risco Alto.")
+                Toast.makeText(this, "Permissão de notificação necessária.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    }
+    // Função auxiliar para verificar a permissão antes de tentar enviar uma notificação
+    private fun checkNotificationPermission(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        }
+        return true // Para versões anteriores ao Android 13, a permissão é concedida por padrão
     }
 
     // Função que recupera os dados do Firebase
@@ -55,6 +105,8 @@ class DashboardActivity : AppCompatActivity() {
         val txtTemp = findViewById<TextView>(R.id.tv_temperature)
         val txtUmi = findViewById<TextView>(R.id.tv_humidity)
         val txtPressao = findViewById<TextView>(R.id.tv_pressure)
+        val txtPreci = findViewById<TextView>(R.id.tv_flood_level)
+        val texLevel = findViewById<TextView>(R.id.tv_flood_risk_label)
 
         // Declara o caminho dos dados do sensor DHT
         val refDht = database.getReference("sensor/data/")
@@ -70,6 +122,9 @@ class DashboardActivity : AppCompatActivity() {
 
                 val pressao = snapshot.child("pressao").getValue<Float>()
                 txtPressao.text = "%.1f hPa".format(pressao).replace('.',',')
+
+                val volume = snapshot.child("volume").getValue<Float>()
+                txtPreci.text = "%.1f mm".format(volume).replace('.',',')
 
             }
             // Função que trata algum erro
@@ -216,11 +271,4 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-
-
-        //val button = findViewById<Button>(R.id.btnMap)
-        //button.setOnClickListener {
-            //val intent = Intent(this, MapsActivity::class.java)
-            //startActivity(intent)
-        //}
 }
