@@ -69,6 +69,7 @@ class DashboardActivity : AppCompatActivity() {
         val txtPressao = findViewById<TextView>(R.id.tv_pressure)
         val txtPreci = findViewById<TextView>(R.id.tv_flood_level)
         val txtvolume = findViewById<TextView>(R.id.tv_volume_mm)
+        val txtPercentual = findViewById<TextView>(R.id.tv_flood_percent)
 
         // Declara o caminho dos dados do sensor DHT
         val refDht = database.getReference("sensor/data/")
@@ -101,10 +102,18 @@ class DashboardActivity : AppCompatActivity() {
                 val volume = snapshot.child("volume").getValue<Float>()
                 if (volume != null) {
                     txtPreci.text = String.format("%.1f mm", volume).replace('.', ',')
-                    txtvolume.text = String.format("%.1f mm/h", volume).replace('.', ',')
+                    txtvolume.text = String.format("%.1f mm/s", volume).replace('.', ',')
                 }else{
                     txtPreci.text = getString(R.string.volume)
                     txtvolume.text = getString(R.string.sem_dados)
+                }
+
+                val percentual = snapshot.child("percentual").getValue<Int>()
+                if(percentual != null){
+                    txtPercentual.text = "$percentual%"
+
+                } else{
+                    txtPercentual.text = getString(R.string.porcentagem)
                 }
 
                 // Busca e processa o alertLevel

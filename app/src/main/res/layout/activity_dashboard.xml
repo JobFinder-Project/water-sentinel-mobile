@@ -14,19 +14,20 @@
         android:id="@+id/tv_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="50sp"
         android:text="@string/itacoatiara"
         android:textColor="@color/white"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:autoSizeTextType="uniform"/>
 
     <TextView
         android:id="@+id/tv_temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="0sp"
         android:text="@string/sem_temperatura"
         android:textColor="@color/white"
         android:textSize="56sp"
@@ -34,7 +35,8 @@
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_location" />
+        app:layout_constraintTop_toBottomOf="@id/tv_location"
+        app:autoSizeTextType="uniform"/>
 
     <TextView
         android:id="@+id/tv_weather_desc"
@@ -48,13 +50,14 @@
         app:layout_constraintTop_toBottomOf="@id/tv_temperature"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp"/>
+        android:layout_marginTop="4sp"
+        app:autoSizeTextType="uniform"/>
 
     <!--<TextView
         android:id="@+id/tv_max_min"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="0sp"
         android:text="Max:- -°  Min:- -°"
         android:textColor="@color/white"
         android:textSize="14sp"
@@ -65,22 +68,22 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_flood_risk"
-        android:layout_width="0dp"
+        android:layout_width="0sp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
+        app:cardCornerRadius="20sp"
+        app:cardElevation="4sp"
         app:cardBackgroundColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/tv_weather_desc"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp">
+        android:layout_marginTop="16sp"
+        android:layout_marginStart="16sp"
+        android:layout_marginEnd="16sp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="16sp">
 
             <TextView
                 android:id="@+id/tv_flood_risk_label"
@@ -91,36 +94,38 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintStart_toStartOf="parent"
+                app:autoSizeTextType="uniform"/>
             <!-- Informações do card-->
             <LinearLayout
                 android:id="@+id/ll_flood_details_group"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginStart="15dp"
+                android:layout_marginStart="15sp"
                 app:layout_constraintTop_toBottomOf="@id/tv_flood_risk_label"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="5sp"
                 android:gravity="bottom">
 
                 <TextView
                     android:id="@+id/tv_flood_percent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginBottom="5sp"
                     android:text="@string/porcentagem"
                     android:textColor="@color/design_green"
                     android:textSize="36sp"
                     android:textStyle="bold"
-                    app:layout_constraintTop_toBottomOf="@id/tv_flood_risk_label"/>
+                    app:layout_constraintTop_toBottomOf="@id/tv_flood_risk_label"
+                    app:autoSizeTextType="uniform"/>
 
                 <LinearLayout
                     android:id="@+id/ll_risk_mm_vertical_group"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="8dp">
+                    android:layout_marginStart="8sp">
 
                     <TextView
                         android:id="@+id/tv_flood_risk_level_text"
@@ -129,7 +134,8 @@
                         android:text="@string/baixo"
                         android:textColor="@color/design_green"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:autoSizeTextType="uniform"/>
 
                     <!-- Volume em mm/h-->
                     <TextView
@@ -139,16 +145,17 @@
                         android:text="@string/volume"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="14sp"
-                        android:layout_marginTop="0dp"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginTop="0sp"
+                        android:layout_marginBottom="12sp"
+                        app:autoSizeTextType="uniform"/>
                 </LinearLayout>
             </LinearLayout>
 
             <ImageView
                 android:id="@+id/img_flood_icon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="85dp"
+                android:layout_width="48sp"
+                android:layout_height="48sp"
+                android:layout_marginStart="85sp"
                 android:contentDescription="@string/risco_de_alagamento"
                 android:foregroundGravity="center"
                 android:src="@drawable/gota"
@@ -164,34 +171,34 @@
 
     <LinearLayout
         android:id="@+id/ll_info_row"
-        android:layout_width="0dp"
+        android:layout_width="0sp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16sp"
+        android:layout_marginTop="24sp"
+        android:layout_marginEnd="16sp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/card_flood_risk">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal"
             android:background="@drawable/item_background"
-            android:padding="16dp"
-            android:layout_marginEnd="4dp">
+            android:padding="16sp"
+            android:layout_marginEnd="4sp">
 
             <ImageView
                 android:id="@+id/img_humidity_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="32sp"
+                android:layout_height="32sp"
                 android:contentDescription="@string/umidade"
                 android:src="@drawable/gota"
                 app:tint="@color/white"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8sp"/>
 
             <TextView
                 android:id="@+id/tv_humidity"
@@ -201,35 +208,38 @@
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="4sp"
+                app:autoSizeTextType="uniform"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/umidade"
                 android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                app:autoSizeTextType="uniform"/>
         </LinearLayout>
 
         <!--essa é a parte da pressão, bicho-->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal"
             android:background="@drawable/item_background"
-            android:padding="16dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp">
+            android:padding="16sp"
+            android:layout_marginStart="4sp"
+            android:layout_marginEnd="4sp"
+            app:autoSizeTextType="uniform">
 
             <ImageView
                 android:id="@+id/img_pressure_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="32sp"
+                android:layout_height="32sp"
                 android:contentDescription="@string/pressao"
                 android:src="@drawable/pressao"
                 app:tint="@color/white"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8sp"/>
 
             <TextView
                 android:id="@+id/tv_pressure"
@@ -239,36 +249,39 @@
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="4sp"
+                app:autoSizeTextType="uniform"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/pressao"
                 android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                app:autoSizeTextType="uniform"/>
 
         </LinearLayout>
 
         <!-- essa é a parte da precipitação, bicho do mato-->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal"
             android:background="@drawable/item_background"
-            android:padding="16dp"
-            android:layout_marginStart="4dp">
+            android:padding="16sp"
+            android:layout_marginStart="4sp"
+            app:autoSizeTextType="uniform">
 
             <ImageView
                 android:id="@+id/img_precipitation_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="32sp"
+                android:layout_height="32sp"
                 android:contentDescription="@string/precipitaco"
                 android:src="@drawable/rain_simples"
                 app:tint="@color/white"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8sp"/>
 
             <TextView
                 android:id="@+id/tv_flood_level"
@@ -278,15 +291,16 @@
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="4sp"/>
 
             <TextView
-            android:id="@+id/txt_precipitation_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/precipitaco"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
+                android:id="@+id/txt_precipitation_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/precipitaco"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:autoSizeTextType="uniform"/>
         </LinearLayout>
     </LinearLayout>
 
