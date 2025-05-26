@@ -148,7 +148,8 @@ class DashboardActivity : AppCompatActivity() {
 
         val textoRisco: String
         val corTextoRiscoRes: Int
-        val idIconeRes: Int
+        val idIconSunny: Int
+        val idIconeGota: Int
         val corIconeRes: Int
 
         var tituloNotificacao = ""
@@ -159,13 +160,13 @@ class DashboardActivity : AppCompatActivity() {
             0 -> { // Sem Risco
                 textoRisco = getString(R.string.risk_0_no_risk)
                 corTextoRiscoRes = R.color.risk_color_blue
-                idIconeRes = R.drawable.sunny
+                idIconeGota = R.drawable.sunny
                 corIconeRes = R.color.risk_color_blue
             }
             1 -> { // Baixo Risco
                 textoRisco = getString(R.string.risk_1_low)
                 corTextoRiscoRes = R.color.risk_color_green
-                idIconeRes = R.drawable.gota
+                idIconeGota = R.drawable.gota
                 corIconeRes = R.color.risk_color_green
 
                 tituloNotificacao = getString(R.string.risk_1_low)
@@ -175,7 +176,7 @@ class DashboardActivity : AppCompatActivity() {
             2 -> { // Médio Risco
                 textoRisco = getString(R.string.risk_2_medium)
                 corTextoRiscoRes = R.color.risk_color_yellow
-                idIconeRes = R.drawable.gota
+                idIconeGota = R.drawable.gota
                 corIconeRes = R.color.risk_color_yellow
 
                 tituloNotificacao = getString(R.string.risk_2_medium)
@@ -185,7 +186,7 @@ class DashboardActivity : AppCompatActivity() {
             3 -> { // Alto Risco
                 textoRisco = getString(R.string.risk_3_high)
                 corTextoRiscoRes = R.color.risk_color_red
-                idIconeRes = R.drawable.gota
+                idIconeGota = R.drawable.gota
                 corIconeRes = R.color.risk_color_red
 
                 tituloNotificacao = getString(R.string.risk_3_high)
@@ -195,7 +196,7 @@ class DashboardActivity : AppCompatActivity() {
             else -> { // nenhum nível
                 textoRisco = getString(R.string.risk_level_unknown)
                 corTextoRiscoRes = android.R.color.darker_gray
-                idIconeRes = R.drawable.sunny // trocar por outra coisa
+                idIconeGota = R.drawable.sunny // trocar por outra coisa
                 corIconeRes = android.R.color.darker_gray
             }
         }
@@ -209,8 +210,14 @@ class DashboardActivity : AppCompatActivity() {
         tvLocalRiskLevelText.text = textoRisco
         tvLocalRiskLevelText.setTextColor(corResolvedaParaTexto)
 
-        imgLocalRiskIcon.setImageResource(idIconeRes)
-        ImageViewCompat.setImageTintList(imgLocalRiskIcon, ColorStateList.valueOf(corResolvedaParaIcone))
+        imgLocalRiskIcon.setImageResource(idIconeGota)
+        if (idIconeGota == R.drawable.sunny) {
+            ImageViewCompat.setImageTintList(imgLocalRiskIcon, null)
+        } else {
+
+            val corResolvedaParaIconeTint = ContextCompat.getColor(this, corIconeRes)
+            ImageViewCompat.setImageTintList(imgLocalRiskIcon, ColorStateList.valueOf(corResolvedaParaIconeTint))
+        }
 
         tvLocalFloodPercent.setTextColor(corResolvedaParaTexto) // Usa a mesma cor do texto de risco
 
