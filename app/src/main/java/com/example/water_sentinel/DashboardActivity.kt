@@ -8,11 +8,11 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.google.firebase.database.DataSnapshot
@@ -93,7 +93,8 @@ class DashboardActivity : AppCompatActivity() {
 
                 val pressao = snapshot.child("pressao").getValue<Float>()
                 if(pressao != null) {
-                    txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
+                    //txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
+                    txtPressao.text = "%d hPa".format(pressao.toInt())
                 }else{
                     txtPressao.text = getString(R.string.sem_dados)
                 }
