@@ -23,20 +23,18 @@ class App : Application() {
 
 object NotificationHelper {
 
-    // O ID do canal que você já estava usando
     const val CHANNEL_ID = "water-sentinel-channel"
-    private var notificationIdCounter = 0 // Para IDs de notificação únicos
+    private var notificationIdCounter = 0
 
-    // Este método deve ser chamado pela sua classe Application
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = context.getString(R.string.channel_name) // Certifique-se de ter este string resource
-            val descriptionText = "Notificações sobre riscos de alagamento e enchentes" // Ou outro resource
-            val importance = NotificationManager.IMPORTANCE_HIGH // Use HIGH para alertas importantes
+            val name = context.getString(R.string.channel_name)
+            val descriptionText = "Notificações sobre riscos de alagamento e enchentes"
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
                 enableVibration(true)
-                vibrationPattern = longArrayOf(100, 200, 100, 200, 300, 400) // Ajuste conforme necessário
+                vibrationPattern = longArrayOf(100, 200, 100, 200, 300, 400)
                 // enableLights(true)
                 // lightColor = Color.RED // Se quiser luzes
             }
@@ -52,16 +50,6 @@ object NotificationHelper {
         riskLevel: String, // Ex: "Risco Baixo", "Risco Médio", "Risco Alto"
         message: String
     ) {
-        // Verifica a permissão ANTES de tentar construir e enviar a notificação
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                Log.w("NotificationHelper", "Permissão POST_NOTIFICATIONS não concedida. Não é possível enviar notificação.")
-                // Idealmente, a Activity já deveria ter solicitado a permissão.
-                // Você pode optar por não fazer nada aqui ou logar,
-                // já que a responsabilidade de pedir permissão é da Activity.
-                return
-            }
-        }
 
         val notificationId = notificationIdCounter++
 
@@ -84,14 +72,13 @@ object NotificationHelper {
         }
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.background_gradient) // ADICIONE ESTE ÍCONE EM RES/DRAWABLE
+            .setSmallIcon(R.drawable.perigo_chuva) // icone da notificação
             .setContentTitle(riskLevel)
             .setContentText(message)
             .setPriority(priority)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-        // .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)) // Som padrão
-        // .setVibrate(longArrayOf(100, 200, 300, 400, 500)) // Padrão de vibração já definido no canal para Android O+
+            .setVibrate(longArrayOf(100, 200, 300, 400, 500))
 
         with(NotificationManagerCompat.from(context)) {
             try {
@@ -104,16 +91,15 @@ object NotificationHelper {
         }
     }
 
-    // Funções de simulação (chamadas pelos botões na Activity)
     fun simulateLowRisk(context: Context) {
-        sendFloodRiskNotification(context, "Risco Baixo", "Nível de água estável. Monitore.")
+        sendFloodRiskNotification(context, "Baixo Risco", "Sem chuva, sem preocupações!")
     }
 
     fun simulateMediumRisk(context: Context) {
-        sendFloodRiskNotification(context, "Risco Médio", "Atenção! Nível de água subindo. Prepare-se.")
+        sendFloodRiskNotification(context, "Médio Risco", "Atenção! Nível de água subindo. Prepare-se.")
     }
 
     fun simulateHighRisk(context: Context) {
-        sendFloodRiskNotification(context, "Risco Alto", "PERIGO! Risco iminente de enchente. Procure um local seguro!")
+        sendFloodRiskNotification(context, "Alto Risco ", "PERIGO! Risco iminente de enchente. Procure um local seguro!")
     }
 }

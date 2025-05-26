@@ -106,7 +106,7 @@ class DashboardActivity : AppCompatActivity() {
         val txtUmi = findViewById<TextView>(R.id.tv_humidity)
         val txtPressao = findViewById<TextView>(R.id.tv_pressure)
         val txtPreci = findViewById<TextView>(R.id.tv_flood_level)
-        val texLevel = findViewById<TextView>(R.id.tv_flood_risk_label)
+        val txtvolume = findViewById<TextView>(R.id.tv_volume_mm)
 
         // Declara o caminho dos dados do sensor DHT
         val refDht = database.getReference("sensor/data/")
@@ -115,16 +115,39 @@ class DashboardActivity : AppCompatActivity() {
             // Busca temperatura e umidade toda vez que for alterado
             override fun onDataChange(snapshot: DataSnapshot) {
                 val temperatura = snapshot.child("temperatura").getValue<Float>()
-                txtTemp.text = "%.1f°C".format(temperatura).replace('.', ',')
+                if(temperatura != null) {
+                    txtTemp.text = "%.1f°C".format(temperatura).replace('.', ',')
+                }else{
+                    txtTemp.text = getString(R.string.sem_temperatura)
+                }
 
                 val umidade = snapshot.child("umidade").getValue<Int>()
-                txtUmi.text = "$umidade%"
+                if (umidade != null) {
+                    txtUmi.text = "$umidade%"
+                }else{
+                    txtUmi.text = getString(R.string.sem_dados)
+                }
 
                 val pressao = snapshot.child("pressao").getValue<Float>()
-                txtPressao.text = "%.1f hPa".format(pressao).replace('.',',')
+                if(pressao != null) {
+                    txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
+                }else{
+                    txtPressao.text = getString(R.string.sem_dados)
+                }
+
+                val precipitacao = snapshot.child("volume").getValue<Float>() //trocar em algum momento isso e criar variáveis diferentes
+                if (precipitacao != null) {
+                    txtPreci.text = "%.1f mm".format(precipitacao).replace('.', ',')
+                }else{
+                    txtPreci.text = getString(R.string.sem_dados)
+                }
 
                 val volume = snapshot.child("volume").getValue<Float>()
-                txtPreci.text = "%.1f mm".format(volume).replace('.',',')
+                if (volume != null) {
+                    txtvolume.text = "$volume mm/h".format(volume).replace('.', ',')
+                }else{
+                    txtTemp.text = getString(R.string.volume)
+                }
 
             }
             // Função que trata algum erro
