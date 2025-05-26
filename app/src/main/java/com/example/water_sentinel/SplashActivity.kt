@@ -1,7 +1,7 @@
 package com.example.water_sentinel
 
 import android.content.Intent
-import android.graphics.Color
+//import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,7 +17,6 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
 
         supportActionBar?.hide()
-        window.statusBarColor = Color.parseColor("#005AA7")
 
         Handler(Looper.getMainLooper()).postDelayed({
             val intent = Intent(this, WelcomeActivity::class.java)

@@ -23,6 +23,11 @@
     <color name="alert_low">#4CAF50</color>   <!-- Verde (baixo) -->
     <color name="alert_medium">#FFD600</color> <!-- Amarelo (médio) -->
     <color name="alert_high">#F44336</color>  <!-- Vermelho (alto) -->
+    <color name="risk_color_blue">#2196F3</color>
+    <color name="risk_color_green">#4CAF50</color>
+    <color name="risk_color_yellow">#FFC107</color>
+    <color name="risk_color_red">#F44336</color>
+    <color name="text_color_on_yellow">#000000</color>
 
     <!-- Outros -->
     <color name="divider">#1FFFFFFF</color> <!-- Branco 12% para divisores -->
