@@ -32,10 +32,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY" />
-        <!-- <activity -->
-        <!-- android:name=".MapsActivity" -->
-        <!-- android:exported="true" /> -->
+            android:value="${MAPS_API_KEY}" />
 
         <activity
             android:name=".DashboardActivity"
@@ -43,6 +40,9 @@
         <activity
             android:name=".WelcomeActivity"
             android:exported="false" />
+        <activity
+            android:name=".MapsActivity"
+            android:exported="true" />
         <activity
             android:name=".SplashActivity"
             android:exported="true">

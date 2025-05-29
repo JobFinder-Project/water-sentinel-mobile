@@ -1,20 +1,37 @@
 package com.example.water_sentinel
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
+import androidx.fragment.app.FragmentContainerView
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -27,13 +44,22 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 
-class DashboardActivity : AppCompatActivity() {
+class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val CODIGO_PERMISSAO_NOTIFICACAO = 1001
+        private const val CODIGO_PERMISSAO_LOCALIZACAO = 1002
         private const val TAG = "DashboardActivity" // Tag para logs
     }
+    private lateinit var map: GoogleMap
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
     private val database = Firebase.database
     private var lastNotifiedAlertLevel: Int = -1
+    private var locationRequest = LocationRequest.create().apply {
+        interval = 5000
+        fastestInterval = 3000
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,19 +67,25 @@ class DashboardActivity : AppCompatActivity() {
         setContentView(R.layout.activity_dashboard)
         Log.d(TAG, "onCreate: Activity Criada")
 
+        checarPermissaoLocalizacao()
         solicitarPermissaoNotificacao()
 
         setupFirebaseListener()
 
+        // Captura o mapa
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+        // Configura clique para abrir o mapa
+        findViewById<FragmentContainerView>(R.id.mapView).setOnClickListener {
+            startActivity(Intent(this, MapsActivity::class.java))
+        }
+
+        // Recupera a localização do usuário nesta activity
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
-    // Função auxiliar para verificar a permissão antes de tentar enviar uma notificação
-    private fun checkNotificationPermission(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        }
-        return true // Para versões anteriores ao Android 13, a permissão é concedida por padrão
-    }
+    // ------------ DADOS -----------
 
     // Função que recupera os dados do Firebase
     private fun setupFirebaseListener() {
@@ -224,7 +256,7 @@ class DashboardActivity : AppCompatActivity() {
 
         // envia notificação se necessário e permitido
         if (deveEnviarNotificacao) { // verifica se uma notificação é justificada pelo nível de alerta
-            if (checkNotificationPermission()) {
+            if (checarPermissaoNotificacao()) {
                 if (nivelAlertaAtual != lastNotifiedAlertLevel) {
                     NotificationHelper.sendFloodRiskNotification(this, tituloNotificacao, mensagemNotificacao)
                     lastNotifiedAlertLevel = nivelAlertaAtual
@@ -240,7 +272,6 @@ class DashboardActivity : AppCompatActivity() {
             //Log.d(TAG, "Nível de risco zerado. lastNotifiedAlertLevel resetado.")
         }
     }
-
 
     // Função para alterar satus do sistema
     private fun setupTimestampListener() {
@@ -298,6 +329,52 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    // ------------ NOTIFICAÇÕES -----------
+
+    // Função para tratar a resposta da solicitação de permissao
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            CODIGO_PERMISSAO_NOTIFICACAO -> {
+                // se a requisição for cancelada, o array estará vazio
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // Permissão concedida
+                    Toast.makeText(
+                        this,
+                        "Notificações ativadas",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            CODIGO_PERMISSAO_LOCALIZACAO -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (::map.isInitialized) {
+                        mostrarLocalizacaoAtual()
+                    }
+                } else {
+                    // Permissão negada
+                    Toast.makeText(
+                        this,
+                        "Ative a localização nas configurações para ver sua posição",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+
+    // Função auxiliar para verificar a permissão antes de tentar enviar uma notificação
+    private fun checarPermissaoNotificacao(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        }
+        return true // Para versões anteriores ao Android 13, a permissão é concedida por padrão
+    }
+
+    // Função que realiza a solicitação da permissão de notificações
     private fun solicitarPermissaoNotificacao() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // API 33+
@@ -336,31 +413,90 @@ class DashboardActivity : AppCompatActivity() {
             .show()
     }
 
-    // Função para tratar a resposta da solicitação de permissao
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    // ------------ MAPA -----------
 
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    // Função de setup do mapa
+    //@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
+        desativarInteracoes()
+        //Log.e("LOCALIZACAO", "passou, map = $map")
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mostrarLocalizacaoAtual()
+        }
 
-        when (requestCode) {
-            CODIGO_PERMISSAO_NOTIFICACAO -> {
-                // se a requisição for cancelada, o array estará vazio
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // Permissão concedida
-                    Toast.makeText(
-                        this,
-                        "Notificações ativadas",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    // Permissão negada
-                    Toast.makeText(
-                        this,
-                        "Notificações desativadas",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+
+    }
+
+    // Função que desativa as interações do mapa
+    private fun desativarInteracoes() {
+        with(map.uiSettings) {
+            isScrollGesturesEnabled = false
+            isZoomGesturesEnabled = false
+            isRotateGesturesEnabled = false
+            isTiltGesturesEnabled = false
+            isMapToolbarEnabled = false
+        }
+        map.setOnMapClickListener {
+            startActivity(Intent(this, MapsActivity::class.java))
         }
     }
 
+    // Função que verifica a permissão de localizacao
+    private fun checarPermissaoLocalizacao() {
+        val permissao = Manifest.permission.ACCESS_FINE_LOCATION
+
+        when {
+            // Verifica se já há permissão
+            ContextCompat.checkSelfPermission(this, permissao) == PackageManager.PERMISSION_GRANTED -> {
+                mostrarLocalizacaoAtual()
+            }
+
+            // Verifica se o usuário já negou uma vez
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this, permissao) -> {
+                solicitarPermissaoLocalizacao()
+            }
+
+            // Se não há permissão
+            else -> {
+                solicitarPermissaoLocalizacao()
+            }
+
+        }
+    }
+
+    // Função para verificar a permissão do acesso a localização
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun mostrarLocalizacaoAtual() {
+        // Ativa as configurações de localização atual do GoogleMaps
+        map.isMyLocationEnabled = true
+        map.uiSettings.isMyLocationButtonEnabled = true
+
+        // A cada atualização da localização, o mapa também é atualizado
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(lr: LocationResult) {
+                lr.lastLocation?.let { location ->
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                }
+            }
+        }
+
+        // Realiza a atualização da localização do dispositivo em um tempo determinado
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
+    }
+
+    // Função para solicitar a permissão de localização do usuário
+    private fun solicitarPermissaoLocalizacao() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            CODIGO_PERMISSAO_LOCALIZACAO
+        )
+    }
 }

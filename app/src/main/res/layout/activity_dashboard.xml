@@ -248,7 +248,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/sem_dados"
                 android:textColor="@color/white"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp"
                 app:autoSizeTextType="uniform"
@@ -307,6 +307,17 @@
                 app:autoSizeTextType="uniform"/>
         </LinearLayout>
     </LinearLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapView"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="349dp"
+        android:layout_height="162dp"
+        android:layout_marginBottom="208dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:context=".MapsActivity" />
 
 
     <!-- parte dos botões de simulação-->
