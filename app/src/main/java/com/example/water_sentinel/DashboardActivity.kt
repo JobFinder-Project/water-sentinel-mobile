@@ -67,14 +67,14 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_dashboard)
         Log.d(TAG, "onCreate: Activity Criada")
 
-        checarPermissaoLocalizacao()
-        solicitarPermissaoNotificacao()
-
-        setupFirebaseListener()
-
         // Captura o mapa
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+
+        solicitarPermissaoNotificacao()
+
+        setupFirebaseListener()
 
         // Configura clique para abrir o mapa
         findViewById<FragmentContainerView>(R.id.mapView).setOnClickListener {
@@ -102,6 +102,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         val txtPreci = findViewById<TextView>(R.id.tv_flood_level)
         val txtvolume = findViewById<TextView>(R.id.tv_volume_mm)
         val txtPercentual = findViewById<TextView>(R.id.tv_flood_percent)
+        val txtStatus = findViewById<TextView>(R.id.tv_weather_desc)
 
         // Declara o caminho dos dados do sensor DHT
         val refDht = database.getReference("sensor/data/")
@@ -110,39 +111,39 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
             // Busca temperatura e umidade toda vez que for alterado
             override fun onDataChange(snapshot: DataSnapshot) {
                 val temperatura = snapshot.child("temperatura").getValue<Float>()
-                if(temperatura != null) {
+                if(txtStatus.text == "Sistema ativo") {
                     txtTemp.text = "%.1f°C".format(temperatura).replace('.', ',')
                 }else{
                     txtTemp.text = getString(R.string.sem_temperatura)
                 }
 
                 val umidade = snapshot.child("umidade").getValue<Int>()
-                if (umidade != null) {
+                if (txtStatus.text == "Sistema ativo") {
                     txtUmi.text = "$umidade%"
                 }else{
                     txtUmi.text = getString(R.string.sem_dados)
                 }
 
                 val pressao = snapshot.child("pressao").getValue<Float>()
-                if(pressao != null) {
+                if(txtStatus.text == "Sistema ativo") {
                     //txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
-                    txtPressao.text = "%d hPa".format(pressao.toInt())
+                    txtPressao.text = "%d hPa"//.format(pressao.toInt())
                 }else{
                     txtPressao.text = getString(R.string.sem_dados)
                 }
 
                 //como são o mesmo dado, defino junto
                 val volume = snapshot.child("volume").getValue<Float>()
-                if (volume != null) {
+                if (txtStatus.text == "Sistema ativo") {
                     txtPreci.text = String.format("%.1f mm", volume).replace('.', ',')
                     txtvolume.text = String.format("%.1f mm/s", volume).replace('.', ',')
                 }else{
-                    txtPreci.text = getString(R.string.volume)
+                    txtPreci.text = getString(R.string.sem_dados)
                     txtvolume.text = getString(R.string.sem_dados)
                 }
 
                 val percentual = snapshot.child("percentual").getValue<Int>()
-                if(percentual != null){
+                if(txtStatus.text == "Sistema ativo"){
                     txtPercentual.text = "$percentual%"
 
                 } else{
@@ -419,13 +420,12 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
     //@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        checarPermissaoLocalizacao()
         desativarInteracoes()
         //Log.e("LOCALIZACAO", "passou, map = $map")
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mostrarLocalizacaoAtual()
         }
-
-
     }
 
     // Função que desativa as interações do mapa
