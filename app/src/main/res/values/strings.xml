@@ -32,7 +32,7 @@
     <string name="risk_1_low">Baixo Risco</string>
     <string name="risk_2_medium">Médio Risco</string>
     <string name="risk_3_high">Alto Risco</string>
-    <string name="risk_level_unknown">Desconhecido</string>
+    <string name="risk_level_unknown">---</string>
 
 
     <string name="message_low_risk">Chuva detectada. Monitore as condições.</string>

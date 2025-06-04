@@ -175,14 +175,13 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         val tvLocalRiskLevelText = findViewById<TextView>(R.id.tv_flood_risk_level_text)
         val imgLocalRiskIcon = findViewById<ImageView>(R.id.img_flood_icon)
         val tvLocalFloodPercent = findViewById<TextView>(R.id.tv_flood_percent)
+        val txtStatus = findViewById<TextView>(R.id.tv_weather_desc)
 
         val nivelAlertaAtual = alertLevelFirebase ?: 0
         //Log.d(TAG, "processarMudancaAlertLevel - nivelAlertaAtual SENDO PROCESSADO: $nivelAlertaAtual (valor original do Firebase: $alertLevelFirebase)")
 
-
         val textoRisco: String
         val corTextoRiscoRes: Int
-        val idIconSunny: Int
         val idIconeGota: Int
         val corIconeRes: Int
 
@@ -190,48 +189,55 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         var mensagemNotificacao = ""
         var deveEnviarNotificacao = false
 
-        when (nivelAlertaAtual) {
-            0 -> { // Sem Risco
-                textoRisco = getString(R.string.risk_0_no_risk)
-                corTextoRiscoRes = R.color.risk_color_blue
-                idIconeGota = R.drawable.sunny
-                corIconeRes = R.color.risk_color_blue
-            }
-            1 -> { // Baixo Risco
-                textoRisco = getString(R.string.risk_1_low)
-                corTextoRiscoRes = R.color.risk_color_green
-                idIconeGota = R.drawable.gota
-                corIconeRes = R.color.risk_color_green
+        if(txtStatus.text == "Sistema inativo") {
+            textoRisco = getString(R.string.risk_level_unknown)
+            corTextoRiscoRes = android.R.color.darker_gray
+            idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
+            corIconeRes = android.R.color.darker_gray
+        } else {
+            when (nivelAlertaAtual) {
+                0 -> { // Sem Risco
+                    textoRisco = getString(R.string.risk_0_no_risk)
+                    corTextoRiscoRes = R.color.risk_color_blue
+                    idIconeGota = R.drawable.sunny
+                    corIconeRes = R.color.risk_color_blue
+                }
+                1 -> { // Baixo Risco
+                    textoRisco = getString(R.string.risk_1_low)
+                    corTextoRiscoRes = R.color.risk_color_green
+                    idIconeGota = R.drawable.gota
+                    corIconeRes = R.color.risk_color_green
 
-                tituloNotificacao = getString(R.string.risk_1_low)
-                mensagemNotificacao = getString(R.string.message_low_risk)
-                deveEnviarNotificacao = true
-            }
-            2 -> { // Médio Risco
-                textoRisco = getString(R.string.risk_2_medium)
-                corTextoRiscoRes = R.color.risk_color_yellow
-                idIconeGota = R.drawable.gota
-                corIconeRes = R.color.risk_color_yellow
+                    tituloNotificacao = getString(R.string.risk_1_low)
+                    mensagemNotificacao = getString(R.string.message_low_risk)
+                    deveEnviarNotificacao = true
+                }
+                2 -> { // Médio Risco
+                    textoRisco = getString(R.string.risk_2_medium)
+                    corTextoRiscoRes = R.color.risk_color_yellow
+                    idIconeGota = R.drawable.gota
+                    corIconeRes = R.color.risk_color_yellow
 
-                tituloNotificacao = getString(R.string.risk_2_medium)
-                mensagemNotificacao = getString(R.string.message_medium_risk)
-                deveEnviarNotificacao = true
-            }
-            3 -> { // Alto Risco
-                textoRisco = getString(R.string.risk_3_high)
-                corTextoRiscoRes = R.color.risk_color_red
-                idIconeGota = R.drawable.gota
-                corIconeRes = R.color.risk_color_red
+                    tituloNotificacao = getString(R.string.risk_2_medium)
+                    mensagemNotificacao = getString(R.string.message_medium_risk)
+                    deveEnviarNotificacao = true
+                }
+                3 -> { // Alto Risco
+                    textoRisco = getString(R.string.risk_3_high)
+                    corTextoRiscoRes = R.color.risk_color_red
+                    idIconeGota = R.drawable.gota
+                    corIconeRes = R.color.risk_color_red
 
-                tituloNotificacao = getString(R.string.risk_3_high)
-                mensagemNotificacao = getString(R.string.message_high_risk)
-                deveEnviarNotificacao = true
-            }
-            else -> { // nenhum nível
-                textoRisco = getString(R.string.risk_level_unknown)
-                corTextoRiscoRes = android.R.color.darker_gray
-                idIconeGota = R.drawable.sunny // trocar por outra coisa
-                corIconeRes = android.R.color.darker_gray
+                    tituloNotificacao = getString(R.string.risk_3_high)
+                    mensagemNotificacao = getString(R.string.message_high_risk)
+                    deveEnviarNotificacao = true
+                }
+                else -> {
+                    textoRisco = getString(R.string.risk_level_unknown)
+                    corTextoRiscoRes = android.R.color.darker_gray
+                    idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
+                    corIconeRes = android.R.color.darker_gray
+                }
             }
         }
 
