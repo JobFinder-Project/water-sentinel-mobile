@@ -29,6 +29,10 @@
     <color name="risk_color_red">#F44336</color>
     <color name="text_color_on_yellow">#000000</color>
 
+    <!-- Mapa - Dashboard -->
+    <color name="map_background">#1A3657</color>
+    <color name="card_stroke_color">#33000000</color>
+
     <!-- Outros -->
     <color name="divider">#1FFFFFFF</color> <!-- Branco 12% para divisores -->
     <color name="gray_card">#F1F3F4</color> <!-- Cinza claro para cards secundários -->
