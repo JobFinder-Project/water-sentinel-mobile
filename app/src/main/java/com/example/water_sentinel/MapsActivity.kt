@@ -3,8 +3,11 @@ package com.example.water_sentinel
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Bundle
 import android.os.Looper
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +22,11 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import androidx.core.graphics.createBitmap
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -45,11 +52,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // Configura clique para abrir o mapa
-        findViewById<FragmentContainerView>(R.id.map).setOnClickListener {
-            startActivity(Intent(this, MapsActivity::class.java))
-        }
-
         // Recupera a localização do usuário nesta activity
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
@@ -61,8 +63,61 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+
         checarPermissaoLocalizacao()
+
+        val statusRiscoAtual = (application as MyApp).globalStatusRisco
+        val monitoringPoints = listOf(
+            LatLng(-3.0905, -59.9863)
+        )
+        monitoringPoints.forEach { point ->
+            addRiskMarker(point, statusRiscoAtual)
+        }
     }
+
+    private fun addRiskMarker(latLng: LatLng, statusRisco: Int) {
+        //val statusRisco = findViewById<TextView>(R.id.tv_flood_risk_level_text).text.toString()
+
+        val icone: BitmapDescriptor = when (statusRisco) {
+            0 -> bitmapDescriptorFromVector(R.drawable.ic_marker_no_risk)
+            1 -> bitmapDescriptorFromVector(R.drawable.ic_marker_low_risk)
+            2 -> bitmapDescriptorFromVector(R.drawable.ic_marker_medium_risk)
+            3 -> bitmapDescriptorFromVector(R.drawable.ic_marker_high_risk)
+            else -> bitmapDescriptorFromVector(R.drawable.sinal_off_de_rede)
+        }
+
+        val titulo: String = when (statusRisco) {
+            0 -> getString(R.string.risk_0_no_risk)
+            1 -> getString(R.string.risk_1_low)
+            2 -> getString(R.string.risk_2_medium)
+            3 -> getString(R.string.risk_3_high)
+            else -> getString(R.string.risk_level_unknown)
+        }
+
+        map.addMarker(
+            MarkerOptions()
+                .position(latLng)
+                .title(titulo)
+                .icon(icone)
+        )
+    }
+
+    private fun bitmapDescriptorFromVector(vectorResId: Int): BitmapDescriptor {
+        val vectorDrawable = ContextCompat.getDrawable(this, vectorResId)
+        vectorDrawable!!.setBounds(
+            0,
+            0,
+            vectorDrawable.intrinsicWidth,
+            vectorDrawable.intrinsicHeight
+        )
+        val bitmap = createBitmap(vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)
+        val canvas = Canvas(bitmap)
+        vectorDrawable.draw(canvas)
+
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
+    }
+
+    // ------------ PERMISSÃO LOCALIZAÇÃO -----------
 
     // Função que verifica a permissão de localizacao
     private fun checarPermissaoLocalizacao() {

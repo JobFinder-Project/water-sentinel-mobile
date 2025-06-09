@@ -22,6 +22,8 @@
     <string name="pressao">Pressão</string>
     <string name="precipitaco">Precipitação</string>
 
+    <!-- 3° tela -->
+    <string name="titulo_toolbar">Mapa de Alertas</string>
 
     <string name="porcentagem">--%</string>
     <string name="baixo">Baixo Risco</string>
