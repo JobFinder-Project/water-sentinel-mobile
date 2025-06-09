@@ -180,6 +180,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         val nivelAlertaAtual = alertLevelFirebase ?: 0
         //Log.d(TAG, "processarMudancaAlertLevel - nivelAlertaAtual SENDO PROCESSADO: $nivelAlertaAtual (valor original do Firebase: $alertLevelFirebase)")
 
+        // Atualiza o status de risco do sistema
+        (application as MyApp).globalStatusRisco = nivelAlertaAtual
+
         val textoRisco: String
         val corTextoRiscoRes: Int
         val idIconeGota: Int

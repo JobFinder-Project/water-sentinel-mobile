@@ -127,6 +127,7 @@
                     android:orientation="vertical"
                     android:layout_marginStart="8dp">
 
+                    <!-- Volume em mm/h-->
                     <TextView
                         android:id="@+id/tv_flood_risk_level_text"
                         android:layout_width="wrap_content"
@@ -135,9 +136,8 @@
                         android:textColor="@color/design_green"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        app:autoSizeTextType="uniform"/>
+                        app:autoSizeTextType="uniform" />
 
-                    <!-- Volume em mm/h-->
                     <TextView
                         android:id="@+id/tv_volume_mm"
                         android:layout_width="wrap_content"
