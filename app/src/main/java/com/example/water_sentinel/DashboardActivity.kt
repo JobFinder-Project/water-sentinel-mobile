@@ -124,10 +124,10 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                     txtUmi.text = getString(R.string.sem_dados)
                 }
 
-                val pressao = snapshot.child("pressao").getValue<Float>()
+                val pressao = snapshot.child("pressao").getValue<Int>()
                 if(txtStatus.text == "Sistema ativo") {
                     //txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
-                    txtPressao.text = "%d hPa"//.format(pressao.toInt())
+                    txtPressao.text = "$pressao hPa"//.format(pressao.toInt())
                 }else{
                     txtPressao.text = getString(R.string.sem_dados)
                 }
