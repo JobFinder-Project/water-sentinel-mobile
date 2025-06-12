@@ -68,7 +68,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val statusRiscoAtual = (application as MyApp).globalStatusRisco
         val monitoringPoints = listOf(
-            LatLng(-3.0905, -59.9863)
+            LatLng(-3.14162, -58.43252)
         )
         monitoringPoints.forEach { point ->
             addRiskMarker(point, statusRiscoAtual)
