@@ -8,6 +8,7 @@ import android.graphics.Canvas
 import android.os.Bundle
 import android.os.Looper
 import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.core.app.ActivityCompat
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import androidx.core.graphics.createBitmap
+import com.example.water_sentinel.databinding.ActivityMapsBinding
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -35,6 +37,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private lateinit var map: GoogleMap
+    private lateinit var binding: ActivityMapsBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private var locationRequest = LocationRequest.create().apply {
@@ -45,15 +48,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
+
+        binding = ActivityMapsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Captura o mapa
         val mapFragment =
-            supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+            supportFragmentManager.findFragmentById(binding.map.id) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         // Recupera a localização do usuário nesta activity
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        setupToolbar()
+    }
+
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        // Configura o clique no ícone de voltar
+        binding.toolbar.setNavigationOnClickListener {
+            // Navega de volta para a DashboardActivity
+            val intent = Intent(this, DashboardActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+        }
     }
 
 
@@ -79,19 +99,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //val statusRisco = findViewById<TextView>(R.id.tv_flood_risk_level_text).text.toString()
 
         val icone: BitmapDescriptor = when (statusRisco) {
-            0 -> bitmapDescriptorFromVector(R.drawable.ic_marker_no_risk)
-            1 -> bitmapDescriptorFromVector(R.drawable.ic_marker_low_risk)
-            2 -> bitmapDescriptorFromVector(R.drawable.ic_marker_medium_risk)
-            3 -> bitmapDescriptorFromVector(R.drawable.ic_marker_high_risk)
-            else -> bitmapDescriptorFromVector(R.drawable.sinal_off_de_rede)
+            0 -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.ic_marker_no_risk)!!)
+            1 -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.ic_marker_low_risk)!!)
+            2 -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.ic_marker_medium_risk)!!)
+            3 -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.ic_marker_high_risk)!!)
+            else -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.sinal_off_de_rede)!!)
         }
 
         val titulo: String = when (statusRisco) {
-            0 -> getString(R.string.risk_0_no_risk)
-            1 -> getString(R.string.risk_1_low)
-            2 -> getString(R.string.risk_2_medium)
-            3 -> getString(R.string.risk_3_high)
-            else -> getString(R.string.risk_level_unknown)
+            0 -> binding.root.context.getString(R.string.risk_0_no_risk)
+            1 -> binding.root.context.getString(R.string.risk_1_low)
+            2 -> binding.root.context.getString(R.string.risk_2_medium)
+            3 -> binding.root.context.getString(R.string.risk_3_high)
+            else -> binding.root.context.getString(R.string.risk_level_unknown)
         }
 
         map.addMarker(
@@ -102,18 +122,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    private fun bitmapDescriptorFromVector(vectorResId: Int): BitmapDescriptor {
-        val vectorDrawable = ContextCompat.getDrawable(this, vectorResId)
-        vectorDrawable!!.setBounds(
-            0,
-            0,
-            vectorDrawable.intrinsicWidth,
-            vectorDrawable.intrinsicHeight
-        )
-        val bitmap = createBitmap(vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)
+    private fun bitmapDescriptorFromVector(drawable: android.graphics.drawable.Drawable): BitmapDescriptor {
+        drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        vectorDrawable.draw(canvas)
-
+        drawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 
