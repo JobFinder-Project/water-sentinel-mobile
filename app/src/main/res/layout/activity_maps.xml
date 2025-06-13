@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
+    <!-- ToolBar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,6 +25,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Mapa interativo -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -36,4 +38,32 @@
             android:layout_height="match_parent"
             tools:context=".MapsActivity" />
     </FrameLayout>
+
+    <!-- Bottom Sheet para detalhes -->
+    <LinearLayout
+        android:id="@+id/bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_sheet_background"
+        android:padding="16dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        app:behavior_peekHeight="0dp"
+        app:behavior_hideable="true">
+
+        <TextView
+            android:id="@+id/tv_posto_nome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tv_posto_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="16sp"/>
+
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
