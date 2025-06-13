@@ -206,7 +206,13 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
             corTextoRiscoRes = android.R.color.darker_gray
             idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
             corIconeRes = android.R.color.darker_gray
-            (application as MyApp).postoAlerta.status = -1
+            (application as MyApp).postoAlerta.apply {
+                this.riscoPorcentagem = 0
+                this.umidade = 0
+                this.temperatura = 0f
+                this.pressao = 0
+                this.status = -1
+            }
         } else {
             when (nivelAlertaAtual) {
                 0 -> { // Sem Risco
