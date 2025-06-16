@@ -110,6 +110,8 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         refDht.addValueEventListener(object : ValueEventListener {
             // Busca temperatura e umidade toda vez que for alterado
             override fun onDataChange(snapshot: DataSnapshot) {
+                val app = (application as MyApp)
+
                 val temperatura = snapshot.child("temperatura").getValue<Float>()
                 if(txtStatus.text == "Sistema ativo") {
                     txtTemp.text = "%.1f°C".format(temperatura).replace('.', ',')
@@ -150,8 +152,18 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                     txtPercentual.text = getString(R.string.porcentagem)
                 }
 
+
                 // Busca e processa o alertLevel
                 val alertLevelAtual = snapshot.child("alertLevel").getValue<Int>()
+
+                // Atualiza os dados do posto de alerta
+                app.postoAlerta.apply {
+                    this.temperatura = temperatura!!
+                    this.umidade = umidade!!
+                    this.pressao = pressao!!
+                    this.riscoPorcentagem = percentual!!
+                    this.status = alertLevelAtual!!
+                }
                 //Log.d(TAG, "setupDataListener - alertLevelAtual DO FIREBASE: $alertLevelAtual")
 
                 processarMudancaAlertLevel(alertLevelAtual)
@@ -180,9 +192,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         val nivelAlertaAtual = alertLevelFirebase ?: 0
         //Log.d(TAG, "processarMudancaAlertLevel - nivelAlertaAtual SENDO PROCESSADO: $nivelAlertaAtual (valor original do Firebase: $alertLevelFirebase)")
 
-        // Atualiza o status de risco do sistema
-        (application as MyApp).globalStatusRisco = nivelAlertaAtual
-
         val textoRisco: String
         val corTextoRiscoRes: Int
         val idIconeGota: Int
@@ -197,6 +206,13 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
             corTextoRiscoRes = android.R.color.darker_gray
             idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
             corIconeRes = android.R.color.darker_gray
+            (application as MyApp).postoAlerta.apply {
+                this.riscoPorcentagem = 0
+                this.umidade = 0
+                this.temperatura = 0f
+                this.pressao = 0
+                this.status = -1
+            }
         } else {
             when (nivelAlertaAtual) {
                 0 -> { // Sem Risco
@@ -302,6 +318,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (dataStr != null && horaStr != null) {
                     val formatterData = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                     val formatterHora = DateTimeFormatter.ofPattern("HH:mm:ss")
+                    (application as MyApp).postoAlerta.ultimaAtualizacao = "${formatterData} - ${formatterHora}"
 
                     // formata a data e hora registrada no firebase
                     try {

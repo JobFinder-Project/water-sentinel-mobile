@@ -13,6 +13,7 @@
     <color name="text_primary">#FFFFFFFF</color> <!-- Branco -->
     <color name="text_secondary">#B3FFFFFF</color> <!-- Branco 70% -->
     <color name="text_black">#FF222222</color> <!-- Preto suave -->
+    <color name="text_gray">#B3DEDEDE</color>
 
     <!-- Ícones e indicadores -->
 
@@ -35,6 +36,7 @@
 
     <!-- Outros -->
     <color name="divider">#1FFFFFFF</color> <!-- Branco 12% para divisores -->
+    <color name="gray_divider">#EEEEEE</color>
     <color name="gray_card">#F1F3F4</color> <!-- Cinza claro para cards secundários -->
     <color name="design_green">#34A853</color>
     <color name="item_background_color">#1A000000</color>

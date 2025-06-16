@@ -24,6 +24,7 @@
 
     <!-- 3° tela -->
     <string name="titulo_toolbar">Mapa de Alertas</string>
+    <string name="localizacao">Localização</string>
 
     <string name="porcentagem">--%</string>
     <string name="baixo">Baixo Risco</string>

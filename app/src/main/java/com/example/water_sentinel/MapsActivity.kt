@@ -7,6 +7,9 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
+import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.core.app.ActivityCompat
@@ -29,8 +32,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import androidx.core.graphics.createBitmap
 import com.example.water_sentinel.databinding.ActivityMapsBinding
+import com.google.android.gms.maps.model.Marker
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     companion object {
         private const val CODIGO_PERMISSAO_LOCALIZACAO = 1002
@@ -38,6 +43,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private var locationRequest = LocationRequest.create().apply {
@@ -61,6 +67,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         setupToolbar()
+
+        setupBottomSheet()
     }
 
     private fun setupToolbar() {
@@ -76,29 +84,43 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun setupBottomSheet() {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        // Configuração opcional do comportamento
+        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) { }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) { }
+        })
+    }
 
     // ------------ MAPA -----------
 
     // Função de setup do mapa
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
+        map = googleMap.apply {
+            setOnMarkerClickListener(this@MapsActivity)
+            uiSettings.isZoomControlsEnabled = true
+        }
 
         checarPermissaoLocalizacao()
 
-        val statusRiscoAtual = (application as MyApp).globalStatusRisco
-        val monitoringPoints = listOf(
-            LatLng(-3.14162, -58.43252)
-        )
-        monitoringPoints.forEach { point ->
-            addRiskMarker(point, statusRiscoAtual)
-        }
+        setupPostosAlerta()
     }
 
-    private fun addRiskMarker(latLng: LatLng, statusRisco: Int) {
+    private fun setupPostosAlerta() {
+
+        addRiskMarker((application as MyApp).postoAlerta)
+
+    }
+
+    private fun addRiskMarker(posto: PostoAlerta) {
         //val statusRisco = findViewById<TextView>(R.id.tv_flood_risk_level_text).text.toString()
 
-        val icone: BitmapDescriptor = when (statusRisco) {
+        val icone: BitmapDescriptor = when (posto.status) {
             0 -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.ic_marker_no_risk)!!)
             1 -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.ic_marker_low_risk)!!)
             2 -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.ic_marker_medium_risk)!!)
@@ -106,20 +128,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             else -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.sinal_off_de_rede)!!)
         }
 
-        val titulo: String = when (statusRisco) {
+        /*val titulo: String = when (posto.status) {
             0 -> binding.root.context.getString(R.string.risk_0_no_risk)
             1 -> binding.root.context.getString(R.string.risk_1_low)
             2 -> binding.root.context.getString(R.string.risk_2_medium)
             3 -> binding.root.context.getString(R.string.risk_3_high)
             else -> binding.root.context.getString(R.string.risk_level_unknown)
-        }
+        }*/
 
         map.addMarker(
             MarkerOptions()
-                .position(latLng)
-                .title(titulo)
+                .position(posto.latLng)
+                .title(posto.nome)
                 .icon(icone)
-        )
+        )?.also { marker ->
+            marker.tag = posto
+            Log.d("MARKER_DEBUG", "Tag value: ${marker.tag}")
+        }
     }
 
     private fun bitmapDescriptorFromVector(drawable: android.graphics.drawable.Drawable): BitmapDescriptor {
@@ -128,6 +153,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val canvas = Canvas(bitmap)
         drawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)
+    }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        val posto = marker.tag as? PostoAlerta ?: return false
+
+        // Atualiza o ícone de status
+        binding.ivStatusIcon.setImageResource(
+            when(posto.status) {
+                0 -> R.drawable.ic_marker_no_risk
+                1 -> R.drawable.ic_marker_low_risk
+                2 -> R.drawable.ic_marker_medium_risk
+                3 -> R.drawable.ic_marker_high_risk
+                else -> R.drawable.sinal_off_de_rede
+            }
+        )
+
+        // Preenche os dados no Bottom Sheet
+        binding.tvPostoNome.text = posto.nome
+        binding.tvPostoStatus.text = "Status: ${getStatusText(posto.status)}"
+        binding.tvPostoStatus.setTextColor(getStatusColor(posto.status))
+        binding.tvRiscoPorcentagem.text = "Risco: ${posto.riscoPorcentagem}"
+        binding.tvUmidade.text = "Umidade: ${posto.umidade}"
+        binding.tvTemperatura.text = "Temperatura: ${posto.temperatura}"
+        binding.tvPressao.text = "Pressão: ${posto.pressao}"
+
+        // Localizaçãao
+        binding.tvEndereco.text = "${posto.endereco.rua}, ${posto.endereco.bairro}, ${"${posto.endereco.cidade}/${posto.endereco.estado}"}"
+        binding.tvCoordenadas.text = "Lat: ${posto.latLng.latitude} Long: ${posto.latLng.longitude}"
+
+        if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED){
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+
+        return true
     }
 
     // ------------ PERMISSÃO LOCALIZAÇÃO -----------
@@ -189,4 +248,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             CODIGO_PERMISSAO_LOCALIZACAO
         )
     }
+
+    private fun getStatusText(status: Int): String {
+        return when(status) {
+            0 -> "Sem risco"
+            1 -> "Baixo risco"
+            2 -> "Médio risco"
+            3 -> "Alto risco"
+            else -> "Sistema inativo"
+        }
+    }
+
+    private fun getStatusColor(status: Int): Int {
+        return ContextCompat.getColor(this, when(status) {
+            0 -> R.color.alert_low
+            1 -> R.color.risk_color_blue
+            2 -> R.color.alert_medium
+            3 -> R.color.alert_high
+            else -> android.R.color.darker_gray
+        })
+    }
+
+
 }
