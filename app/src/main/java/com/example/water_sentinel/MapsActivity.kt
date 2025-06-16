@@ -52,6 +52,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
+    private var isPrimAtualizacaoLoc = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -225,10 +227,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         // A cada atualização da localização, o mapa também é atualizado
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(lr: LocationResult) {
-                lr.lastLocation?.let { location ->
-                    val latLng = LatLng(location.latitude, location.longitude)
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                if (isPrimAtualizacaoLoc) {
+                    // Centraliza apenas na primeira atualização
+                    lr.lastLocation?.let { location ->
+                        val latLng = LatLng(location.latitude, location.longitude)
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                    }
                 }
+                isPrimAtualizacaoLoc = false
             }
         }
 
