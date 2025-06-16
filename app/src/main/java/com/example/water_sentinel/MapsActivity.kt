@@ -112,17 +112,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     }
 
     private fun setupPostosAlerta() {
-        val statusRiscoAtual = (application as MyApp).globalStatusRisco
-        val postosAlerta = listOf(
-            PostoAlerta (
-                nome = "Posto 1",
-                latLng = LatLng(-3.14162, -58.43252),
-                status = statusRiscoAtual
-            )
-        )
-        postosAlerta.forEach { point ->
-            addRiskMarker(point)
-        }
+
+        addRiskMarker((application as MyApp).postoAlerta)
+
     }
 
     private fun addRiskMarker(posto: PostoAlerta) {
@@ -166,11 +158,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     override fun onMarkerClick(marker: Marker): Boolean {
         val posto = marker.tag as? PostoAlerta ?: return false
 
+        // Atualiza o ícone de status
+        binding.ivStatusIcon.setImageResource(
+            when(posto.status) {
+                0 -> R.drawable.ic_marker_no_risk
+                1 -> R.drawable.ic_marker_low_risk
+                2 -> R.drawable.ic_marker_medium_risk
+                3 -> R.drawable.ic_marker_high_risk
+                else -> R.drawable.sinal_off_de_rede
+            }
+        )
 
         // Preenche os dados no Bottom Sheet
         binding.tvPostoNome.text = posto.nome
         binding.tvPostoStatus.text = "Status: ${getStatusText(posto.status)}"
         binding.tvPostoStatus.setTextColor(getStatusColor(posto.status))
+        binding.tvRiscoPorcentagem.text = "Risco: ${posto.riscoPorcentagem}"
+        binding.tvUmidade.text = "Umidade: ${posto.umidade}"
+        binding.tvTemperatura.text = "Temperatura: ${posto.temperatura}"
+        binding.tvPressao.text = "Pressão: ${posto.pressao}"
+
+        // Localizaçãao
+        binding.tvEndereco.text = "${posto.endereco.rua}, ${posto.endereco.bairro}, ${"${posto.endereco.cidade}/${posto.endereco.estado}"}"
+        binding.tvCoordenadas.text = "Lat: ${posto.latLng.latitude} Long: ${posto.latLng.longitude}"
 
         if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED){
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -259,10 +269,5 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         })
     }
 
-    data class PostoAlerta(
-        val nome: String,
-        val latLng: LatLng,
-        val status: Int,
-        //val ultimaAtualizacao: String
-    )
+
 }
