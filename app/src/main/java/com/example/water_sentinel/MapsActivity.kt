@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -32,6 +33,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import androidx.core.graphics.createBitmap
 import com.example.water_sentinel.databinding.ActivityMapsBinding
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
@@ -53,6 +55,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     }
 
     private var isPrimAtualizacaoLoc = true
+    private var radius = 50.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,6 +123,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     }
 
     private fun addRiskMarker(posto: PostoAlerta) {
+        val latitudeCentral = 10.0 / 111000
+        val latLngCentral = LatLng(posto.latLng.latitude + latitudeCentral, posto.latLng.longitude)
         //val statusRisco = findViewById<TextView>(R.id.tv_flood_risk_level_text).text.toString()
 
         val icone: BitmapDescriptor = when (posto.status) {
@@ -130,13 +135,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             else -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.sinal_off_de_rede)!!)
         }
 
-        /*val titulo: String = when (posto.status) {
-            0 -> binding.root.context.getString(R.string.risk_0_no_risk)
-            1 -> binding.root.context.getString(R.string.risk_1_low)
-            2 -> binding.root.context.getString(R.string.risk_2_medium)
-            3 -> binding.root.context.getString(R.string.risk_3_high)
-            else -> binding.root.context.getString(R.string.risk_level_unknown)
-        }*/
+        val cor = when (posto.status) {
+            0 -> binding.root.context.getColor(R.color.no_alert_transparent)
+            1 -> binding.root.context.getColor(R.color.alert_low_transparent)
+            2 -> binding.root.context.getColor(R.color.alert_medium_transparent)
+            3 -> binding.root.context.getColor(R.color.alert_high_transparent)
+            else -> binding.root.context.getColor(R.color.unknow_alert_transparent)
+        }
 
         map.addMarker(
             MarkerOptions()
@@ -147,6 +152,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             marker.tag = posto
             Log.d("MARKER_DEBUG", "Tag value: ${marker.tag}")
         }
+
+        map.addCircle(
+            CircleOptions()
+                .center(latLngCentral)
+                .radius(radius)
+                .fillColor(cor)
+                .strokeColor(Color.TRANSPARENT)
+                .strokeWidth(0f))
     }
 
     private fun bitmapDescriptorFromVector(drawable: android.graphics.drawable.Drawable): BitmapDescriptor {
