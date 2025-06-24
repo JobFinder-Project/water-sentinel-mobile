@@ -1,15 +1,19 @@
 package com.example.water_sentinel
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.DrawableRes
@@ -89,16 +93,57 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupBottomSheet() {
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN
+            isHideable = true
 
-        // Configuração opcional do comportamento
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) { }
+            // Overlay transparente
+            val overlayView = View(this@MapsActivity).apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
 
-            override fun onSlide(bottomSheet: View, slideOffset: Float) { }
-        })
+                setOnTouchListener { v, event ->
+                    // Verifica se o clique foi fora do BottomSheet
+                    val bottomSheetRect = Rect()
+                    binding.bottomSheet.getGlobalVisibleRect(bottomSheetRect)
+
+                    if (!bottomSheetRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                        // Clique fora do BottomSheet → fecha
+                        state = BottomSheetBehavior.STATE_HIDDEN
+                        true
+                    } else {
+                        // Clique dentro do BottomSheet → não faz nada
+                        false
+                    }
+                }
+            }
+
+            addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED,
+                        BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                            (binding.root as? ViewGroup)?.addView(overlayView)
+                        }
+                        BottomSheetBehavior.STATE_HIDDEN,
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            (binding.root as? ViewGroup)?.removeView(overlayView)
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    overlayView.alpha = slideOffset.coerceAtLeast(0f)
+                }
+            })
+        }
+
+        // Remove qualquer listener desnecessário do BottomSheet
+        binding.bottomSheet.setOnClickListener(null)
     }
 
     // ------------ MAPA -----------
