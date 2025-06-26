@@ -46,13 +46,14 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:background="@android:color/white"
+        android:background="@drawable/rounded_corner_shape_legend"
+        android:backgroundTint="@android:color/white"
         android:elevation="2dp"
         android:orientation="vertical"
         android:translationZ="2dp"
         android:padding="8dp">
 
-        <TextView
+        <!----><TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/legenda"
@@ -65,11 +66,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
+            android:layout_marginBottom="4dp">
             <View
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:background="#FF4CAF50"
+                android:background="@drawable/rounded_corner_shape_form"
+                android:backgroundTint="#FF4CAF50"
                 android:layout_marginEnd="4dp"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -84,11 +86,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
+            android:layout_marginBottom="4dp">
             <View
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:background="#FF2196F3"
+                android:background="@drawable/rounded_corner_shape_form"
+                android:backgroundTint="#FF2196F3"
                 android:layout_marginEnd="4dp"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -103,11 +106,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
+            android:layout_marginBottom="4dp">
             <View
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:background="#FFFFEB3B"
+                android:background="@drawable/rounded_corner_shape_form"
+                android:backgroundTint="#FFFFEB3B"
                 android:layout_marginEnd="4dp"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -125,7 +129,8 @@
             <View
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:background="#FFF44336"
+                android:background="@drawable/rounded_corner_shape_form"
+                android:backgroundTint="#FFF44336"
                 android:layout_marginEnd="4dp"/>
             <TextView
                 android:layout_width="wrap_content"

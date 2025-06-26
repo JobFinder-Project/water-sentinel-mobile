@@ -28,7 +28,7 @@
 
     <string name="porcentagem">--%</string>
     <string name="baixo">Baixo Risco</string>
-    <string name="legenda">Legenda</string>
+    <string name="legenda">Informações de Status</string>
     <string name="sem_risco">Sem risco</string>
     <string name="baixo_risco">Baixo risco</string>
     <string name="medio_rsico">Médio risco</string>
