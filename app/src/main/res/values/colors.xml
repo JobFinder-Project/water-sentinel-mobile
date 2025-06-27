@@ -30,6 +30,12 @@
     <color name="risk_color_red">#F44336</color>
     <color name="text_color_on_yellow">#000000</color>
 
+    <color name="no_alert_transparent">#1F38E738</color>
+    <color name="alert_low_transparent">#232196F3</color>
+    <color name="alert_medium_transparent">#26FFD600</color>
+    <color name="alert_high_transparent">#2AF44336</color>
+    <color name="unknow_alert_transparent">#23000000</color>
+
     <!-- Mapa - Dashboard -->
     <color name="map_background">#1A3657</color>
     <color name="card_stroke_color">#33000000</color>

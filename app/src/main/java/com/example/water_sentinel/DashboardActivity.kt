@@ -6,6 +6,8 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
@@ -18,6 +20,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentContainerView
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -29,6 +32,8 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -452,6 +457,8 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mostrarLocalizacaoAtual()
         }
+
+        addRiskMarker((application as MyApp).postoAlerta)
     }
 
     // Função que desativa as interações do mapa
@@ -466,6 +473,42 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         map.setOnMapClickListener {
             startActivity(Intent(this, MapsActivity::class.java))
         }
+    }
+
+    private fun addRiskMarker(posto: PostoAlerta) {
+        //val statusRisco = findViewById<TextView>(R.id.tv_flood_risk_level_text).text.toString()
+
+        val icone: BitmapDescriptor = when (posto.status) {
+            0 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_no_risk)!!)
+            1 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_low_risk)!!)
+            2 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_medium_risk)!!)
+            3 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_high_risk)!!)
+            else -> bitmapDescriptorFromVector(getDrawable(R.drawable.sinal_off_de_rede)!!)
+        }
+
+        /*val titulo: String = when (posto.status) {
+            0 -> binding.root.context.getString(R.string.risk_0_no_risk)
+            1 -> binding.root.context.getString(R.string.risk_1_low)
+            2 -> binding.root.context.getString(R.string.risk_2_medium)
+            3 -> binding.root.context.getString(R.string.risk_3_high)
+            else -> binding.root.context.getString(R.string.risk_level_unknown)
+        }*/
+
+        map.addMarker(
+            MarkerOptions()
+                .position(posto.latLng)
+                .icon(icone)
+        )?.also { marker ->
+            marker.tag = posto
+        }
+    }
+
+    private fun bitmapDescriptorFromVector(drawable: android.graphics.drawable.Drawable): BitmapDescriptor {
+        drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.draw(canvas)
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 
     // Função que verifica a permissão de localizacao
