@@ -33,6 +33,8 @@
         android:textSize="56sp"
         android:textStyle="bold"
         android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_location"

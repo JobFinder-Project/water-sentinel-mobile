@@ -37,6 +37,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.example.water_sentinel.db.AppDatabase
+import com.example.water_sentinel.db.DataHistory
+import com.example.water_sentinel.db.TodoDao
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -47,6 +50,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import android.widget.LinearLayout
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -65,6 +72,8 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         fastestInterval = 3000
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
+
+    private val todoDao: TodoDao by lazy { (application as MyApp).database.todoDao() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +97,19 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Recupera a localização do usuário nesta activity
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+
+        // --- CONFIGURAÇÃO DOS CLIQUES NOS CARDS ---
+        findViewById<LinearLayout>(R.id.card_humidity).setOnClickListener {
+            showHistoryDialog("humidity", "Histórico de Umidade")
+        }
+        findViewById<LinearLayout>(R.id.card_pressure).setOnClickListener {
+            showHistoryDialog("pressure", "Histórico de Pressão")
+        }
+        findViewById<LinearLayout>(R.id.card_flood_level).setOnClickListener {
+            showHistoryDialog("card_precipitatio", "Histórico de Precipitação")
+        }
+
     }
 
     // ------------ DADOS -----------
@@ -119,14 +141,20 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 val temperatura = snapshot.child("temperatura").getValue<Float>()
                 if(txtStatus.text == "Sistema ativo") {
-                    txtTemp.text = "%.1f°C".format(temperatura).replace('.', ',')
+                    val valorFormatado = "%.1f°C".format(temperatura).replace('.', ',')
+                    txtTemp.text = valorFormatado
+                    saveMeasurement("temperature", valorFormatado)
+
                 }else{
                     txtTemp.text = getString(R.string.sem_temperatura)
                 }
 
                 val umidade = snapshot.child("umidade").getValue<Int>()
                 if (txtStatus.text == "Sistema ativo") {
-                    txtUmi.text = "$umidade%"
+                    val valorFormatado = "$umidade%"
+                    txtUmi.text = valorFormatado
+                    saveMeasurement("humidity", valorFormatado)
+
                 }else{
                     txtUmi.text = getString(R.string.sem_dados)
                 }
@@ -134,7 +162,10 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 val pressao = snapshot.child("pressao").getValue<Int>()
                 if(txtStatus.text == "Sistema ativo") {
                     //txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
-                    txtPressao.text = "$pressao hPa"//.format(pressao.toInt())
+                    val valorFormatado = "$pressao hPa"//.format(pressao.toInt())
+                    txtPressao.text = valorFormatado
+                    saveMeasurement("pressure", valorFormatado)
+
                 }else{
                     txtPressao.text = getString(R.string.sem_dados)
                 }
@@ -142,8 +173,16 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 //como são o mesmo dado, defino junto
                 val volume = snapshot.child("volume").getValue<Float>()
                 if (txtStatus.text == "Sistema ativo") {
-                    txtPreci.text = String.format("%.1f mm", volume).replace('.', ',')
-                    txtvolume.text = String.format("%.1f mm/s", volume).replace('.', ',')
+                    // Valores da preciptação
+                    val valorFormatado = String.format("%.1f mm", volume).replace('.', ',')
+                    txtPreci.text = valorFormatado
+                    saveMeasurement("flood_level", valorFormatado)
+
+                    // Valores do volume
+                    val valorFormatado1 = String.format("%.1f mm/s", volume).replace('.', ',')
+                    txtvolume.text = valorFormatado1
+                    saveMeasurement("volume", valorFormatado1)
+
                 }else{
                     txtPreci.text = getString(R.string.sem_dados)
                     txtvolume.text = getString(R.string.sem_dados)
@@ -151,7 +190,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 val percentual = snapshot.child("percentual").getValue<Int>()
                 if(txtStatus.text == "Sistema ativo"){
-                    txtPercentual.text = "$percentual%"
+                    val valorFormatado = "$percentual%"
+                    txtPercentual.text = valorFormatado
+                    saveMeasurement("flood_percent", valorFormatado)
 
                 } else{
                     txtPercentual.text = getString(R.string.porcentagem)
@@ -186,6 +227,19 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
     }
+
+    // --- FUNÇÕES AUXILIARES PARA O HISTÓRICO ---
+    private fun saveMeasurement(type: String, value: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            todoDao.insert(DataHistory(type = type, value = value))
+        }
+    }
+
+    private fun showHistoryDialog(metricType: String, title: String) {
+        val dialog = HistoryDialogFragment.newInstance(metricType, title)
+        dialog.show(supportFragmentManager, "HistoryDialog")
+    }
+
 
     private fun processarMudancaAlertLevel(alertLevelFirebase: Int?) {
         // Obtém as referências para os elementos do card de risco AQUI
