@@ -10,9 +10,6 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.example.water_sentinel.db.TodoDao
-import com.example.water_sentinel.db.HumidityHistory
-import com.example.water_sentinel.db.PrecipitationHistory
-import com.example.water_sentinel.db.PressureHistory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,50 +57,27 @@ class HistoryDialogFragment : DialogFragment() {
 
     private fun loadHistory(type: String, container: LinearLayout) {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val historyList: List<Any> = when (type) {
-                "humidity" -> todoDao.getLatestFiveHumidity()
-                "pressure" -> todoDao.getLatestFivePressure()
-                "precipitation" -> todoDao.getLatestFivePrecipitation()
-                else -> emptyList()
-            }
+            val latestReadings = todoDao.getLatestFiveReadings()
 
             withContext(Dispatchers.Main) {
                 container.removeAllViews()
-                if (historyList.isEmpty()) {
-                    container.addView(TextView(requireContext()).apply { text = "Nenhum histórico disponível." })
+                if (latestReadings.isEmpty()) {
+                    // ...
                 } else {
                     val dateFormat = SimpleDateFormat("dd/MM/yy HH:mm:ss", Locale.getDefault())
-                    for (item in historyList) {
-                        val value: Any?
-                        val timestamp: Long
-                        when (item) {
-                            is HumidityHistory -> {
-                                value = item.value
-                                timestamp = item.timestamp
-                            }
-                            is PressureHistory -> {
-                                value = item.value
-                                timestamp = item.timestamp
-                            }
-                            is PrecipitationHistory -> {
-                                value = item.value
-                                timestamp = item.timestamp
-                            }
-                            else -> {
-                                value = "N/A"
-                                timestamp = 0L
-                            }
+                    for (reading in latestReadings) {
+                        val formattedDate = dateFormat.format(Date(reading.timestamp))
+
+                        val valueToDisplay = when (type) {
+                            "humidity" -> reading.humidity?.let { "$it%" } ?: "N/A"
+                            "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
+                            "precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
+                            "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N.A"
+
+                            else -> "Tipo desconhecido"
                         }
 
-                        val formattedDate = dateFormat.format(Date(timestamp))
-                        val formattedValue = when(type) {
-                            "humidity" -> "$value%"
-                            "pressure" -> "$value hPa"
-                            "precipitation" -> String.format("%.1f mm", value).replace('.', ',')
-                            else -> value.toString()
-                        }
-
-                        val historyEntryText = "$formattedDate:  $formattedValue"
+                        val historyEntryText = "$formattedDate:  $valueToDisplay"
                         container.addView(TextView(requireContext()).apply {
                             text = historyEntryText
                             textSize = 16f
