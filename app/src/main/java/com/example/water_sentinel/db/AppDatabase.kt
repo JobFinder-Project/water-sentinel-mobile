@@ -6,11 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [
-        HumidityHistory::class,
-        PressureHistory::class,
-        PrecipitationHistory::class
-    ], version = 2, exportSchema = false)
+    entities = [DataHistory::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun todoDao(): TodoDao
