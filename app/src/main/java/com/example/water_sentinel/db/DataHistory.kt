@@ -5,29 +5,16 @@ import androidx.room.PrimaryKey
 
 
 @Entity
-data class HumidityHistory(
+data class DataHistory(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val value: Int?,
-    val timestamp: Long = System.currentTimeMillis()
-)
+    val timestamp: Long = System.currentTimeMillis(),
 
-@Entity
-data class PressureHistory(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val value: Int?,
-    val timestamp: Long = System.currentTimeMillis()
-)
-
-@Entity
-data class PrecipitationHistory(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val value: Float?,
-    val timestamp: Long = System.currentTimeMillis()
-)
-
-@Entity
-data class TemperatureHistory(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val value: Float?,
-    val timestamp: Long = System.currentTimeMillis()
+    // Usamos tipos que aceitam nulos (?) para cada sensor, como você pediu.
+    val temperature: Float?,
+    val humidity: Int?,
+    val pressure: Int?,
+    val precipitation: Float?, // Corresponde ao tv_flood_level
+    val volume: Float?,         // Corresponde ao tv_volume_mm
+    val percentage: Int?,      // Corresponde ao tv_flood_percent
+    val status: String?         // Corresponde ao tv_weather_desc
 )
