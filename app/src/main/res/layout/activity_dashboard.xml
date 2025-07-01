@@ -413,7 +413,7 @@
         app:tint="@color/white" />
 
 
-    <!-- parte dos botões de simulação-->
+    <!-- parte dos botões de simulação
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_fake_data"
         android:layout_width="wrap_content"
@@ -422,6 +422,6 @@
         app:srcCompat="@android:drawable/ic_input_add"
         tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="159dp"
-        tools:layout_editor_absoluteY="699dp" />
+        tools:layout_editor_absoluteY="699dp" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

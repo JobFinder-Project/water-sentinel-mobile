@@ -104,7 +104,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
 
-        //solicitarPermissaoNotificacao()
+        solicitarPermissaoNotificacao()
 
         setupFirebaseListener()
 
@@ -127,33 +127,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         findViewById<LinearLayout>(R.id.card_flood_level).setOnClickListener {
             showHistoryDialog("card_precipitation", "Histórico de Precipitação")
         }
-
-        // --- CONFIGURAÇÃO DO BOTÃO DE TESTE ---
-        val fab: com.google.android.material.floatingactionbutton.FloatingActionButton = findViewById(R.id.fab_add_fake_data)
-        fab.setOnClickListener {
-            processAndSaveFakeData()
-            // Mostra uma mensagem rápida para confirmar que o botão foi clicado
-            Toast.makeText(this, "Dado de teste gerado e salvo!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun processAndSaveFakeData() {
-        // 1. Gere valores aleatórios para simular uma nova medição
-        val fakeUmidade = (40..95).random() // Gera um número entre 40 e 95
-        val fakePressao = (980..1020).random()
-        val fakePrecipitacao = "%.1f".format((0..5).random().toFloat()).replace('.', ',') // Gera um float de 0.0 a 5.0
-        val fakeTemperatura = "%.1f".format((18..32).random().toFloat()).replace('.', ',')
-
-        // 2. Atualize a interface do usuário (exatamente como o listener do Firebase faria)
-        findViewById<TextView>(R.id.tv_humidity).text = "$fakeUmidade%"
-        findViewById<TextView>(R.id.tv_pressure).text = "$fakePressao hPa"
-        findViewById<TextView>(R.id.tv_flood_level).text = "$fakePrecipitacao mm"
-
-
-        //saveMeasurement("humidity", "$fakeUmidade%")
-        //saveMeasurement("pressure", "$fakePressao hPa")
-        //saveMeasurement("card_precipitatio", "$fakePrecipitacao mm")
-
     }
 
     // ------------ DADOS -----------
@@ -228,14 +201,16 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 processarMudancaAlertLevel(alertLevelAtual)
 
                 val app = (application as MyApp)
-                app.postoAlerta.apply {
-                    this.temperatura = temperatura!!
-                    this.umidade = umidade!!
-                    this.pressao = pressao!!
-                    this.riscoPorcentagem = percentual!!
-                    this.status = alertLevelAtual!!
+                if (temperatura != null && umidade != null && pressao != null && percentual != null && alertLevelAtual != null) {
+                    app.postoAlerta.apply {
+                        this.temperatura = temperatura
+                        this.umidade = umidade
+                        this.pressao = pressao
+                        this.riscoPorcentagem = percentual
+                        this.status = alertLevelAtual
+                    }
                 }
-                processarMudancaAlertLevel(alertLevelAtual)
+
             }
 
             override fun onCancelled(error: DatabaseError) {
