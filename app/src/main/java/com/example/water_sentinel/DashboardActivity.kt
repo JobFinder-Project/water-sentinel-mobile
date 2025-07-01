@@ -37,7 +37,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.water_sentinel.db.AppDatabase
 import com.example.water_sentinel.db.TodoDao
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -51,7 +50,6 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
-import com.example.water_sentinel.HistoryDialogFragment
 import com.example.water_sentinel.db.DataHistory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,14 +88,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         enableEdgeToEdge()
         setContentView(R.layout.activity_dashboard)
         Log.d(TAG, "onCreate: Activity Criada")
-
-        txtTemp = findViewById(R.id.tv_temperature)
-        txtUmi = findViewById(R.id.tv_humidity)
-        txtPressao = findViewById(R.id.tv_pressure)
-        txtPreci = findViewById(R.id.tv_flood_level)
-        txtvolume = findViewById(R.id.tv_volume_mm)
-        txtPercentual = findViewById(R.id.tv_flood_percent)
-        txtStatus = findViewById(R.id.tv_weather_desc)
 
         // Captura o mapa
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment
@@ -139,15 +129,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
     // Função que acessa os dados do Firebase
     private fun setupDataListener() {
-        // define os elementos UI
-        val txtTemp = findViewById<TextView>(R.id.tv_temperature)
-        val txtUmi = findViewById<TextView>(R.id.tv_humidity)
-        val txtPressao = findViewById<TextView>(R.id.tv_pressure)
-        val txtPreci = findViewById<TextView>(R.id.tv_flood_level)
-        val txtvolume = findViewById<TextView>(R.id.tv_volume_mm)
-        //val txtPercentual = findViewById<TextView>(R.id.tv_flood_percent)
-        //val txtStatus = findViewById<TextView>(R.id.tv_weather_desc)
-
 
         // Declara o caminho dos dados do sensor DHT
         val refDht = database.getReference("sensor/data/")
