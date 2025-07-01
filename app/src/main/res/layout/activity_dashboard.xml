@@ -116,7 +116,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
                     android:text="@string/porcentagem"
-                    android:textColor="@color/design_green"
+                    android:textColor="@android:color/darker_gray"
                     android:textSize="36sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toBottomOf="@id/tv_flood_risk_label"
@@ -134,8 +134,8 @@
                         android:id="@+id/tv_flood_risk_level_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/baixo"
-                        android:textColor="@color/design_green"
+                        android:text="@string/sem_dados"
+                        android:textColor="@color/darker_gray"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         app:autoSizeTextType="uniform" />
@@ -160,13 +160,13 @@
                 android:layout_marginStart="85dp"
                 android:contentDescription="@string/risco_de_alagamento"
                 android:foregroundGravity="center"
-                android:src="@drawable/gota"
+                android:src="@drawable/sinal_off_de_rede"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.700"
                 app:layout_constraintStart_toEndOf="@id/ll_flood_details_group"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/design_green" />
+                app:tint="@color/darker_gray" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -420,6 +420,8 @@
         android:layout_height="wrap_content"
         android:contentDescription="Adicionar Dado de Teste"
         app:srcCompat="@android:drawable/ic_input_add"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="159dp"
+        tools:layout_editor_absoluteY="699dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

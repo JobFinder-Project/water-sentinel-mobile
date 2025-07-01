@@ -182,6 +182,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         refDht.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
+                if (!isSystemActive) {
+                    return
+                }
                 val txtTemp = findViewById<TextView>(R.id.tv_temperature)
                 val txtUmi = findViewById<TextView>(R.id.tv_humidity)
                 val txtPressao = findViewById<TextView>(R.id.tv_pressure)
@@ -217,12 +220,22 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                             status = status
                         )
                         todoDao.insert(currentReading)
+
                     }
                 }
 
                 val alertLevelAtual = snapshot.child("alertLevel").getValue(Int::class.java)
                 processarMudancaAlertLevel(alertLevelAtual)
 
+                val app = (application as MyApp)
+                app.postoAlerta.apply {
+                    this.temperatura = temperatura!!
+                    this.umidade = umidade!!
+                    this.pressao = pressao!!
+                    this.riscoPorcentagem = percentual!!
+                    this.status = alertLevelAtual!!
+                }
+                processarMudancaAlertLevel(alertLevelAtual)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -263,7 +276,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         var mensagemNotificacao = ""
         var deveEnviarNotificacao = false
 
-        if(txtStatus.text == "Sistema inativo") {
+        if(!isSystemActive) {
             textoRisco = getString(R.string.risk_level_unknown)
             corTextoRiscoRes = android.R.color.darker_gray
             idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
@@ -409,12 +422,26 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         val diferencaSeg = (atualTimestamp - ultTimestamp) / 1000
 
         if (diferencaSeg > 20) {
-            txtStatus.text = "Sistema inativo"
-            isSystemActive = false // Atualiza a variável de estado
+            if (isSystemActive) {
+                txtStatus.text = "Sistema inativo"
+                isSystemActive = false // Atualiza a variável de estado
+                clearDashboardData()
+            }
         } else {
             txtStatus.text = "Sistema ativo"
             isSystemActive = true // Atualiza a variável de estado
         }
+    }
+
+    private fun clearDashboardData() { //limpa os dados caso não venha mais do firebase
+        txtTemp.text = "---"
+        txtUmi.text = "---"
+        txtPressao.text = "---"
+        txtPreci.text = "---"
+        txtvolume.text = "---"
+        txtPercentual.text = "---"
+
+        processarMudancaAlertLevel(null)
     }
 
     // ------------ NOTIFICAÇÕES -----------
