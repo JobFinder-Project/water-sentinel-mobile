@@ -62,7 +62,7 @@ class HistoryDialogFragment : DialogFragment() {
             withContext(Dispatchers.Main) {
                 container.removeAllViews()
                 if (latestReadings.isEmpty()) {
-                    // ...
+                    container.addView(TextView(requireContext()).apply { text = "Nenhum histórico disponível." })
                 } else {
                     val dateFormat = SimpleDateFormat("dd/MM/yy HH:mm:ss", Locale.getDefault())
                     for (reading in latestReadings) {
@@ -71,7 +71,7 @@ class HistoryDialogFragment : DialogFragment() {
                         val valueToDisplay = when (type) {
                             "humidity" -> reading.humidity?.let { "$it%" } ?: "N/A"
                             "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
-                            "precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
+                            "card_precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
                             "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N.A"
 
                             else -> "Tipo desconhecido"
