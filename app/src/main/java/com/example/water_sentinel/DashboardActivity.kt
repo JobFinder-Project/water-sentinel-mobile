@@ -38,7 +38,6 @@ import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.water_sentinel.db.AppDatabase
-import com.example.water_sentinel.db.DataHistory
 import com.example.water_sentinel.db.TodoDao
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -52,6 +51,10 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
+import com.example.water_sentinel.HistoryDialogFragment
+import com.example.water_sentinel.db.HumidityHistory
+import com.example.water_sentinel.db.PrecipitationHistory
+import com.example.water_sentinel.db.PressureHistory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -110,6 +113,32 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
             showHistoryDialog("card_precipitatio", "Histórico de Precipitação")
         }
 
+        // --- CONFIGURAÇÃO DO BOTÃO DE TESTE ---
+        val fab: com.google.android.material.floatingactionbutton.FloatingActionButton = findViewById(R.id.fab_add_fake_data)
+        fab.setOnClickListener {
+            processAndSaveFakeData()
+            // Mostra uma mensagem rápida para confirmar que o botão foi clicado
+            Toast.makeText(this, "Dado de teste gerado e salvo!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun processAndSaveFakeData() {
+        // 1. Gere valores aleatórios para simular uma nova medição
+        val fakeUmidade = (40..95).random() // Gera um número entre 40 e 95
+        val fakePressao = (980..1020).random()
+        val fakePrecipitacao = "%.1f".format((0..5).random().toFloat()).replace('.', ',') // Gera um float de 0.0 a 5.0
+        val fakeTemperatura = "%.1f".format((18..32).random().toFloat()).replace('.', ',')
+
+        // 2. Atualize a interface do usuário (exatamente como o listener do Firebase faria)
+        findViewById<TextView>(R.id.tv_humidity).text = "$fakeUmidade%"
+        findViewById<TextView>(R.id.tv_pressure).text = "$fakePressao hPa"
+        findViewById<TextView>(R.id.tv_flood_level).text = "$fakePrecipitacao mm"
+
+
+        //saveMeasurement("humidity", "$fakeUmidade%")
+        //saveMeasurement("pressure", "$fakePressao hPa")
+        //saveMeasurement("card_precipitatio", "$fakePrecipitacao mm")
+
     }
 
     // ------------ DADOS -----------
@@ -143,7 +172,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 if(txtStatus.text == "Sistema ativo") {
                     val valorFormatado = "%.1f°C".format(temperatura).replace('.', ',')
                     txtTemp.text = valorFormatado
-                    saveMeasurement("temperature", valorFormatado)
 
                 }else{
                     txtTemp.text = getString(R.string.sem_temperatura)
@@ -153,8 +181,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (txtStatus.text == "Sistema ativo") {
                     val valorFormatado = "$umidade%"
                     txtUmi.text = valorFormatado
-                    saveMeasurement("humidity", valorFormatado)
-
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        todoDao.insertHumidity(HumidityHistory(value = umidade))
+                    }
                 }else{
                     txtUmi.text = getString(R.string.sem_dados)
                 }
@@ -164,7 +193,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                     //txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
                     val valorFormatado = "$pressao hPa"//.format(pressao.toInt())
                     txtPressao.text = valorFormatado
-                    saveMeasurement("pressure", valorFormatado)
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        todoDao.insertPressure(PressureHistory(value = pressao))
+                    }
 
                 }else{
                     txtPressao.text = getString(R.string.sem_dados)
@@ -176,12 +207,13 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                     // Valores da preciptação
                     val valorFormatado = String.format("%.1f mm", volume).replace('.', ',')
                     txtPreci.text = valorFormatado
-                    saveMeasurement("flood_level", valorFormatado)
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        todoDao.insertPrecipitation(PrecipitationHistory(value = volume))
+                    }
 
                     // Valores do volume
                     val valorFormatado1 = String.format("%.1f mm/s", volume).replace('.', ',')
                     txtvolume.text = valorFormatado1
-                    saveMeasurement("volume", valorFormatado1)
 
                 }else{
                     txtPreci.text = getString(R.string.sem_dados)
@@ -192,7 +224,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 if(txtStatus.text == "Sistema ativo"){
                     val valorFormatado = "$percentual%"
                     txtPercentual.text = valorFormatado
-                    saveMeasurement("flood_percent", valorFormatado)
 
                 } else{
                     txtPercentual.text = getString(R.string.porcentagem)
@@ -228,12 +259,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         })
     }
 
-    // --- FUNÇÕES AUXILIARES PARA O HISTÓRICO ---
-    private fun saveMeasurement(type: String, value: String) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            todoDao.insert(DataHistory(type = type, value = value))
-        }
-    }
 
     private fun showHistoryDialog(metricType: String, title: String) {
         val dialog = HistoryDialogFragment.newInstance(metricType, title)

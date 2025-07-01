@@ -5,10 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [DataHistory::class], version = 1, exportSchema = false)
+@Database(
+    entities = [
+        HumidityHistory::class,
+        PressureHistory::class,
+        PrecipitationHistory::class
+    ], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
-    // Deve retornar o DAO com o nome que você escolheu
     abstract fun todoDao(): TodoDao
 
     companion object {
