@@ -52,9 +52,7 @@ import java.time.format.DateTimeFormatter
 import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
 import com.example.water_sentinel.HistoryDialogFragment
-import com.example.water_sentinel.db.HumidityHistory
-import com.example.water_sentinel.db.PrecipitationHistory
-import com.example.water_sentinel.db.PressureHistory
+import com.example.water_sentinel.db.DataHistory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -181,9 +179,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (txtStatus.text == "Sistema ativo") {
                     val valorFormatado = "$umidade%"
                     txtUmi.text = valorFormatado
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        todoDao.insertHumidity(HumidityHistory(value = umidade))
-                    }
+
                 }else{
                     txtUmi.text = getString(R.string.sem_dados)
                 }
@@ -193,9 +189,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                     //txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
                     val valorFormatado = "$pressao hPa"//.format(pressao.toInt())
                     txtPressao.text = valorFormatado
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        todoDao.insertPressure(PressureHistory(value = pressao))
-                    }
 
                 }else{
                     txtPressao.text = getString(R.string.sem_dados)
@@ -207,9 +200,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                     // Valores da preciptação
                     val valorFormatado = String.format("%.1f mm", volume).replace('.', ',')
                     txtPreci.text = valorFormatado
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        todoDao.insertPrecipitation(PrecipitationHistory(value = volume))
-                    }
 
                     // Valores do volume
                     val valorFormatado1 = String.format("%.1f mm/s", volume).replace('.', ',')
@@ -227,6 +217,24 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 } else{
                     txtPercentual.text = getString(R.string.porcentagem)
+                }
+
+                val status = findViewById<TextView>(R.id.tv_weather_desc).text.toString()
+
+                // objeto para o banco de dados
+                if (status == "Sistema ativo") {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val currentReading = DataHistory(
+                            temperature = temperatura,
+                            humidity = umidade,
+                            pressure = pressao,
+                            precipitation = volume, // Assumindo que precipitação e volume são o mesmo dado
+                            volume = volume,
+                            percentage = percentual,
+                            status = status
+                        )
+                        todoDao.insert(currentReading)
+                    }
                 }
 
 
