@@ -2,6 +2,7 @@ package com.example.water_sentinel
 
 import android.app.Application
 import com.google.android.gms.maps.model.LatLng
+import com.example.water_sentinel.db.AppDatabase
 
 class MyApp : Application() {
     companion object {
@@ -11,11 +12,17 @@ class MyApp : Application() {
 
     //var globalStatusRisco: Int = 4
     //var postos: List<PostoAlerta> = emptyList()
+
+    val database: AppDatabase by lazy { AppDatabase.getDatabase(this) }
+
+
     var postoAlerta: PostoAlerta = PostoAlerta()
 
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        NotificationHelper.createNotificationChannel(applicationContext)
     }
 
 }

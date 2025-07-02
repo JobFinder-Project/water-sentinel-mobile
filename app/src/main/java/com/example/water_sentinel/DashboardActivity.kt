@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
@@ -37,6 +38,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.example.water_sentinel.db.TodoDao
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -47,6 +49,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import android.widget.LinearLayout
+import androidx.lifecycle.lifecycleScope
+import com.example.water_sentinel.db.DataHistory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.time.ZoneId
 
 
 class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -66,6 +74,21 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
+    private val todoDao: TodoDao by lazy { (application as MyApp).database.todoDao() }
+
+    private lateinit var txtTemp: TextView
+    private lateinit var txtUmi: TextView
+    private lateinit var txtPressao: TextView
+    private lateinit var txtPreci: TextView
+    private lateinit var txtvolume: TextView
+    private lateinit var txtPercentual: TextView
+    private lateinit var txtStatus: TextView
+
+
+    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var statusCheckRunnable: Runnable
+    private var ultimoTimestampRecebido: Long = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -81,6 +104,14 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
         setupFirebaseListener()
 
+        txtTemp = findViewById<TextView>(R.id.tv_temperature)
+        txtUmi = findViewById<TextView>(R.id.tv_humidity)
+        txtPressao = findViewById<TextView>(R.id.tv_pressure)
+        txtPreci = findViewById<TextView>(R.id.tv_flood_level)
+        txtvolume = findViewById<TextView>(R.id.tv_volume_mm)
+        txtPercentual = findViewById<TextView>(R.id.tv_flood_percent)
+        txtStatus = findViewById(R.id.tv_weather_desc)
+
         // Configura clique para abrir o mapa
         findViewById<FragmentContainerView>(R.id.mapView).setOnClickListener {
             startActivity(Intent(this, MapsActivity::class.java))
@@ -88,6 +119,29 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Recupera a localização do usuário nesta activity
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+
+        // --- CONFIGURAÇÃO DOS CLIQUES NOS CARDS ---
+        findViewById<LinearLayout>(R.id.card_humidity).setOnClickListener {
+            showHistoryDialog("humidity", "Histórico de Umidade")
+        }
+        findViewById<LinearLayout>(R.id.card_pressure).setOnClickListener {
+            showHistoryDialog("pressure", "Histórico de Pressão")
+        }
+        findViewById<LinearLayout>(R.id.card_flood_level).setOnClickListener {
+            showHistoryDialog("card_precipitation", "Histórico de Precipitação")
+        }
+
+
+
+        // isso abaixo verifica o status para ver se o embarcado continua mandando dados
+        statusCheckRunnable = object : Runnable {
+            override fun run() {
+                checkStatus()
+                handler.postDelayed(this, 3000) // 5000 ms = 5 segundos
+            }
+        }
+        handler.post(statusCheckRunnable)
     }
 
     // ------------ DADOS -----------
@@ -100,83 +154,71 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
     // Função que acessa os dados do Firebase
     private fun setupDataListener() {
-        // define os elementos UI
-        val txtTemp = findViewById<TextView>(R.id.tv_temperature)
-        val txtUmi = findViewById<TextView>(R.id.tv_humidity)
-        val txtPressao = findViewById<TextView>(R.id.tv_pressure)
-        val txtPreci = findViewById<TextView>(R.id.tv_flood_level)
-        val txtvolume = findViewById<TextView>(R.id.tv_volume_mm)
-        val txtPercentual = findViewById<TextView>(R.id.tv_flood_percent)
-        val txtStatus = findViewById<TextView>(R.id.tv_weather_desc)
 
         // Declara o caminho dos dados do sensor DHT
         val refDht = database.getReference("sensor/data/")
 
         refDht.addValueEventListener(object : ValueEventListener {
-            // Busca temperatura e umidade toda vez que for alterado
+
             override fun onDataChange(snapshot: DataSnapshot) {
+                if (!isSystemActive) {
+                    return
+                }
+
+                val temperatura = snapshot.child("temperatura").getValue(Float::class.java)
+                val umidade = snapshot.child("umidade").getValue(Int::class.java)
+                val pressaoRaw = snapshot.child("pressao").getValue(Int::class.java)
+                val volume = snapshot.child("volume").getValue(Float::class.java)
+                val percentual = snapshot.child("percentual").getValue(Int::class.java)
+
+                val pressao: Int? = if (pressaoRaw == 0 || pressaoRaw == null) null else pressaoRaw
+
+                txtTemp.text = temperatura?.let { "%.1f°C".format(it).replace('.', ',') } ?: "---"
+                txtUmi.text = umidade?.let { "$it%" } ?: "---"
+                txtPressao.text = pressao?.let { "$it hPa" } ?: "---"
+                txtPreci.text = volume?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "---"
+                txtvolume.text = volume?.let { String.format("%.1f mm/s", it).replace('.', ',') } ?: "---"
+                txtPercentual.text = percentual?.let { "$it%" } ?: "---"
+
+                val alertLevelAtual = snapshot.child("alertLevel").getValue(Int::class.java)
+                processarMudancaAlertLevel(alertLevelAtual)
+
+                val status = findViewById<TextView>(R.id.tv_weather_desc).text.toString()
+                if (isSystemActive) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val currentReading = DataHistory(
+                            temperature = temperatura,
+                            humidity = umidade,
+                            pressure = pressao,
+                            precipitation = volume,
+                            volume = volume,
+                            percentage = percentual,
+                            status = status
+                        )
+                        todoDao.insert(currentReading)
+
+                    }
+                }
+
                 val app = (application as MyApp)
-
-                val temperatura = snapshot.child("temperatura").getValue<Float>()
-                if(txtStatus.text == "Sistema ativo") {
-                    txtTemp.text = "%.1f°C".format(temperatura).replace('.', ',')
-                }else{
-                    txtTemp.text = getString(R.string.sem_temperatura)
-                }
-
-                val umidade = snapshot.child("umidade").getValue<Int>()
-                if (txtStatus.text == "Sistema ativo") {
-                    txtUmi.text = "$umidade%"
-                }else{
-                    txtUmi.text = getString(R.string.sem_dados)
-                }
-
-                val pressao = snapshot.child("pressao").getValue<Int>()
-                if(txtStatus.text == "Sistema ativo") {
-                    //txtPressao.text = "%.1f hPa".format(pressao).replace('.', ',')
-                    txtPressao.text = "$pressao hPa"//.format(pressao.toInt())
-                }else{
-                    txtPressao.text = getString(R.string.sem_dados)
-                }
-
-                //como são o mesmo dado, defino junto
-                val volume = snapshot.child("volume").getValue<Float>()
-                if (txtStatus.text == "Sistema ativo") {
-                    txtPreci.text = String.format("%.1f mm", volume).replace('.', ',')
-                    txtvolume.text = String.format("%.1f mm/s", volume).replace('.', ',')
-                }else{
-                    txtPreci.text = getString(R.string.sem_dados)
-                    txtvolume.text = getString(R.string.sem_dados)
-                }
-
-                val percentual = snapshot.child("percentual").getValue<Int>()
-                if(txtStatus.text == "Sistema ativo"){
-                    txtPercentual.text = "$percentual%"
-
-                } else{
-                    txtPercentual.text = getString(R.string.porcentagem)
-                }
-
-
-                // Busca e processa o alertLevel
-                val alertLevelAtual = snapshot.child("alertLevel").getValue<Int>()
-
-                // Atualiza os dados do posto de alerta
                 app.postoAlerta.apply {
-                    this.temperatura = temperatura!!
-                    this.umidade = umidade!!
-                    this.pressao = pressao!!
-                    this.riscoPorcentagem = percentual!!
-                    this.status = alertLevelAtual!!
+                    this.temperatura = temperatura ?: 0f
+                    this.umidade = umidade ?: 0
+                    this.pressao = pressao ?: 0
+                    this.riscoPorcentagem = percentual ?: 0
+                    this.status = alertLevelAtual ?: -1
                 }
-                //Log.d(TAG, "setupDataListener - alertLevelAtual DO FIREBASE: $alertLevelAtual")
 
                 processarMudancaAlertLevel(alertLevelAtual)
+
+                if (::map.isInitialized) {
+                    map.clear()
+                    addRiskMarker(app.postoAlerta)
+                }
             }
-            // Função que trata algum erro
+
             override fun onCancelled(error: DatabaseError) {
                 Log.e("Firebase", "Erro ao ler dados", error.toException())
-                // Opcional: Resetar UI para placeholders
                 txtTemp.text = getString(R.string.sem_temperatura)
                 txtUmi.text = getString(R.string.sem_dados)
                 txtPressao.text = getString(R.string.sem_dados)
@@ -186,6 +228,13 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
     }
+
+
+    private fun showHistoryDialog(metricType: String, title: String) {
+        val dialog = HistoryDialogFragment.newInstance(metricType, title)
+        dialog.show(supportFragmentManager, "HistoryDialog")
+    }
+
 
     private fun processarMudancaAlertLevel(alertLevelFirebase: Int?) {
         // Obtém as referências para os elementos do card de risco AQUI
@@ -206,7 +255,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
         var mensagemNotificacao = ""
         var deveEnviarNotificacao = false
 
-        if(txtStatus.text == "Sistema inativo") {
+        if(!isSystemActive) {
             textoRisco = getString(R.string.risk_level_unknown)
             corTextoRiscoRes = android.R.color.darker_gray
             idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
@@ -306,59 +355,62 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
     // Função para alterar satus do sistema
     private fun setupTimestampListener() {
-
-        // define o elemento UI
-        val txtStatus = findViewById<TextView>(R.id.tv_weather_desc)
-
-        // declara o caminho do timestamp
         val refTimestamp = database.getReference("timestamp/")
 
         refTimestamp.addValueEventListener(object : ValueEventListener {
-            // acessa o ultimo timestamp
             override fun onDataChange(snapshot: DataSnapshot) {
                 val horaStr = snapshot.child("hora").getValue<String>()
                 val dataStr = snapshot.child("data").getValue<String>()
 
-                // verifica se os dados não são nulos para formatá-los
                 if (dataStr != null && horaStr != null) {
-                    val formatterData = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                    val formatterHora = DateTimeFormatter.ofPattern("HH:mm:ss")
-                    (application as MyApp).postoAlerta.ultimaAtualizacao = "${formatterData} - ${formatterHora}"
-
-                    // formata a data e hora registrada no firebase
                     try {
-                        val data = LocalDate.parse(dataStr, formatterData)
-                        val hora = LocalTime.parse(horaStr, formatterHora)
+                        val data = LocalDate.parse(dataStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        val hora = LocalTime.parse(horaStr, DateTimeFormatter.ofPattern("HH:mm:ss"))
                         val dataHora = LocalDateTime.of(data, hora)
-                        val ultTimestamp = dataHora.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-                        checkStatus(txtStatus, ultTimestamp)
+
+                        ultimoTimestampRecebido = dataHora.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
                     } catch (e: Exception) {
-                        Log.e("DateTime", "Erro ao parsear data/hora", e)
+                        Log.e("DateTime", "Erro ao parsear data/hora do Firebase", e)
                     }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Erro ao ler hora", error.toException())
+                Log.e("Firebase", "Erro ao ler timestamp", error.toException())
             }
         })
     }
 
+    private var isSystemActive: Boolean = false
+
     // função que altera o status do sistema
-    private fun checkStatus(txtStatus: TextView, ultTimestamp: Long) {
-        // captura o timestamp atual
+    private fun checkStatus() {
         val atualTimestamp = System.currentTimeMillis()
+        val diferencaSeg = (atualTimestamp - ultimoTimestampRecebido) / 1000
 
-        // verifica a diferença de tempo
-        val diferenca = atualTimestamp - ultTimestamp
-        val diferencaSeg = diferenca/1000
-
-        // se caso tiver inatividade a mais de 20 segundos, altera o status
-        if (diferencaSeg > 20) {
-            txtStatus.text = "Sistema inativo"
+        if (ultimoTimestampRecebido == 0L || diferencaSeg > 20) {
+            if (isSystemActive) {
+                isSystemActive = false
+                txtStatus.text = "Sistema inativo"
+                clearDashboardData() // Limpa a UI
+            }
         } else {
-            txtStatus.text = "Sistema ativo"
+            if (!isSystemActive) {
+                isSystemActive = true
+                txtStatus.text = "Sistema ativo"
+            }
         }
+    }
+
+    private fun clearDashboardData() { //limpa os dados caso não venha mais do firebase
+        txtTemp.text = "---"
+        txtUmi.text = "---"
+        txtPressao.text = "---"
+        txtPreci.text = "---"
+        txtvolume.text = "---"
+        txtPercentual.text = "---"
+
+        processarMudancaAlertLevel(null)
     }
 
     // ------------ NOTIFICAÇÕES -----------
@@ -380,6 +432,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+                checarPermissaoLocalizacao()
             }
             CODIGO_PERMISSAO_LOCALIZACAO -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
