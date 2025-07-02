@@ -161,6 +161,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                 txtVolume.text = volume?.let { String.format("%.1f mm/s", it).replace('.', ',') } ?: "---"
                 txtPercentual.text = percentual?.let { "$it%" } ?: "---"
 
+                val alertLevelAtual = snapshot.child("alertLevel").getValue(Int::class.java)
+                processarMudancaAlertLevel(alertLevelAtual)
+
                 val status = findViewById<TextView>(R.id.tv_weather_desc).text.toString()
                 if (isSystemActive) {
                     lifecycleScope.launch(Dispatchers.IO) {
@@ -178,20 +181,21 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
 
-                val alertLevelAtual = snapshot.child("alertLevel").getValue(Int::class.java)
-                processarMudancaAlertLevel(alertLevelAtual)
-
                 val app = (application as MyApp)
-                if (temperatura != null && umidade != null && pressao != null && percentual != null && alertLevelAtual != null) {
-                    app.postoAlerta.apply {
-                        this.temperatura = temperatura
-                        this.umidade = umidade
-                        this.pressao = pressao
-                        this.riscoPorcentagem = percentual
-                        this.status = alertLevelAtual
-                    }
+                app.postoAlerta.apply {
+                    this.temperatura = temperatura ?: 0f
+                    this.umidade = umidade ?: 0
+                    this.pressao = pressao ?: 0
+                    this.riscoPorcentagem = percentual ?: 0
+                    this.status = alertLevelAtual ?: -1
                 }
 
+                processarMudancaAlertLevel(alertLevelAtual)
+
+                if (::map.isInitialized) {
+                    map.clear()
+                    addRiskMarker(app.postoAlerta)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
