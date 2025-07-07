@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="03/07/25"
+        android:text="@string/sem_dados_data"
         android:textColor="@android:color/black" />
 
     <View
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="09:29:50"
+        android:text="@string/sem_dados_hora"
         android:textColor="@android:color/black" />
 
     <View
@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="48%"
+        android:text="@string/sem_dados"
         android:textStyle="bold"
         android:textColor="@android:color/black" />
 

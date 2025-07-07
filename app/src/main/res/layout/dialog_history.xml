@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Histórico"
+            android:text="@string/title_dialog"
             android:textColor="@android:color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -27,7 +27,7 @@
             android:layout_height="32dp"
             android:layout_gravity="end|center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Fechar"
+            android:contentDescription="@string/descricao_dialog"
             android:src="@drawable/ic_close" />
     </FrameLayout>
 
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="Data"
+                android:text="@string/data"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"/>
 
@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="Hora"
+                android:text="@string/hora"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"/>
 
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="Dados"
+                android:text="@string/dados"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"/>
         </LinearLayout>
