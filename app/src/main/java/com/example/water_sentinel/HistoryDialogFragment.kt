@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
 
@@ -55,6 +56,12 @@ class HistoryDialogFragment : DialogFragment() {
         loadHistory(metricType, container)
     }
 
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setBackgroundDrawable(android.graphics.Color.TRANSPARENT.toDrawable())
+        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    }
+
     private fun loadHistory(type: String, container: LinearLayout) {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val latestReadings = todoDao.getLatestFiveReadings()
@@ -64,11 +71,15 @@ class HistoryDialogFragment : DialogFragment() {
                 if (latestReadings.isEmpty()) {
                     container.addView(TextView(requireContext()).apply { text = "Nenhum histórico disponível." })
                 } else {
-                    val dateFormat = SimpleDateFormat("dd/MM/yy HH:mm:ss", Locale.getDefault())
-                    for (reading in latestReadings) {
-                        val formattedDate = dateFormat.format(Date(reading.timestamp))
+                    val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+                    val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                    val inflater = LayoutInflater.from(context)
 
-                        val valueToDisplay = when (type) {
+                    for (reading in latestReadings) {
+                        val rowView = inflater.inflate(R.layout.list_item_history, container, false)
+                        //val formattedDate = dateFormat.format(Date(reading.timestamp))
+
+                        /*val valueToDisplay = when (type) {
                             "humidity" -> reading.humidity?.let { "$it%" } ?: "N/A"
                             "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
                             "card_precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
@@ -82,7 +93,25 @@ class HistoryDialogFragment : DialogFragment() {
                             text = historyEntryText
                             textSize = 16f
                             setPadding(0, 8, 0, 8)
-                        })
+                        })*/
+
+                        val tvDate = rowView.findViewById<TextView>(R.id.tv_history_date)
+                        val tvTime = rowView.findViewById<TextView>(R.id.tv_history_time)
+                        val tvData = rowView.findViewById<TextView>(R.id.tv_history_data)
+
+                        val date = Date(reading.timestamp)
+                        tvDate.text = dateFormat.format(date)
+                        tvTime.text = timeFormat.format(date)
+
+                        tvData.text = when (type) {
+                            "humidity" -> reading.humidity?.let { "$it%" } ?: "N/A"
+                            "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
+                            "card_precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
+                            "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N/A"
+                            else -> "N/A"
+                        }
+
+                        container.addView(rowView)
                     }
                 }
             }
