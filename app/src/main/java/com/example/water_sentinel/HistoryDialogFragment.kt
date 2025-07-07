@@ -18,11 +18,13 @@ import java.util.Date
 import java.util.Locale
 import android.os.Build
 import android.widget.ImageButton
+import android.widget.ScrollView
 import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
 
     private lateinit var todoDao: TodoDao
+    private lateinit var scrollView: ScrollView
 
     companion object {
         private const val ARG_METRIC_TYPE = "metric_type"
@@ -52,6 +54,8 @@ class HistoryDialogFragment : DialogFragment() {
         val container: LinearLayout = view.findViewById(R.id.ll_dialog_history_container)
         val btnClose: ImageButton = view.findViewById(R.id.btn_close_dialog)
 
+        scrollView = view.findViewById(R.id.sv_history_container)
+
         tvTitle.text = title
         btnClose.setOnClickListener { dismiss() }
 
@@ -62,19 +66,29 @@ class HistoryDialogFragment : DialogFragment() {
         super.onStart()
 
         val window = dialog?.window ?: return
-
         window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowMetrics = requireActivity().windowManager.currentWindowMetrics
             val insets = windowMetrics.windowInsets.getInsets(android.view.WindowInsets.Type.systemBars())
             val width = windowMetrics.bounds.width() - insets.left - insets.right
+            val screenWidth = windowMetrics.bounds.width()
+            val screenHeight = windowMetrics.bounds.height()
             window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            scrollView.layoutParams.height = (screenHeight * 0.177).toInt()
         } else {
+            @Suppress("DEPRECATION")
             val displayMetrics = android.util.DisplayMetrics()
+            @Suppress("DEPRECATION")
             requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
             val width = displayMetrics.widthPixels
+            val screenWidth = displayMetrics.widthPixels
+            val screenHeight = displayMetrics.heightPixels
             window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            scrollView.layoutParams.height = (screenHeight * 0.177).toInt()
+
         }
     }
 
