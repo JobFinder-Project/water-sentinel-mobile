@@ -80,11 +80,18 @@
             android:layout_height="1dp"
             android:layout_marginTop="8dp"
             android:background="?android:attr/listDivider"/>
-        <LinearLayout
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_weight="1">
+
+            <LinearLayout
             android:id="@+id/ll_dialog_history_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"/>
+        </ScrollView>
+
     </LinearLayout>
 
 </LinearLayout>

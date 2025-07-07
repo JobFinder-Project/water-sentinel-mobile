@@ -93,23 +93,6 @@ class HistoryDialogFragment : DialogFragment() {
 
                     for (reading in latestReadings) {
                         val rowView = inflater.inflate(R.layout.list_item_history, container, false)
-                        //val formattedDate = dateFormat.format(Date(reading.timestamp))
-
-                        /*val valueToDisplay = when (type) {
-                            "humidity" -> reading.humidity?.let { "$it%" } ?: "N/A"
-                            "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
-                            "card_precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
-                            "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N.A"
-
-                            else -> "Tipo desconhecido"
-                        }
-
-                        val historyEntryText = "$formattedDate:  $valueToDisplay"
-                        container.addView(TextView(requireContext()).apply {
-                            text = historyEntryText
-                            textSize = 16f
-                            setPadding(0, 8, 0, 8)
-                        })*/
 
                         val tvDate = rowView.findViewById<TextView>(R.id.tv_history_date)
                         val tvTime = rowView.findViewById<TextView>(R.id.tv_history_time)
