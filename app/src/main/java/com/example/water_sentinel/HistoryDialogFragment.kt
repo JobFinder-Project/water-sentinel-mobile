@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.os.Build
+import android.widget.ImageButton
 import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
@@ -49,7 +50,7 @@ class HistoryDialogFragment : DialogFragment() {
 
         val tvTitle: TextView = view.findViewById(R.id.dialog_title)
         val container: LinearLayout = view.findViewById(R.id.ll_dialog_history_container)
-        val btnClose: Button = view.findViewById(R.id.btn_close_dialog)
+        val btnClose: ImageButton = view.findViewById(R.id.btn_close_dialog)
 
         tvTitle.text = title
         btnClose.setOnClickListener { dismiss() }
