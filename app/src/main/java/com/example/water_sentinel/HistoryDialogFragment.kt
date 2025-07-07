@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.os.Build
 import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
@@ -58,8 +59,22 @@ class HistoryDialogFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setBackgroundDrawable(android.graphics.Color.TRANSPARENT.toDrawable())
-        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val window = dialog?.window ?: return
+
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowMetrics = requireActivity().windowManager.currentWindowMetrics
+            val insets = windowMetrics.windowInsets.getInsets(android.view.WindowInsets.Type.systemBars())
+            val width = windowMetrics.bounds.width() - insets.left - insets.right
+            window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+        } else {
+            val displayMetrics = android.util.DisplayMetrics()
+            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+            val width = displayMetrics.widthPixels
+            window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
     }
 
     private fun loadHistory(type: String, container: LinearLayout) {
