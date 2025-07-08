@@ -7,7 +7,8 @@
     android:layout_height="match_parent"
     android:background="@drawable/background_gradient"
     android:id="@+id/main"
-    tools:context=".DashboardActivity">
+    tools:context=".DashboardActivity"
+    android:scrollY="@dimen/cardview_default_radius">
 
 
     <TextView
@@ -55,18 +56,6 @@
         android:layout_marginTop="4dp"
         app:autoSizeTextType="uniform"/>
 
-    <!--<TextView
-        android:id="@+id/tv_max_min"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0sp"
-        android:text="Max:- -°  Min:- -°"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_weather_desc" />-->
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_flood_risk"
@@ -324,9 +313,6 @@
 
     <!-- Estilização do mapa -->
 
-
-
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/map_card"
         android:layout_width="0dp"
@@ -400,28 +386,4 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
-
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="40dp"
-        android:src="@drawable/notificacao_icone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.900"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white" />
-
-
-    <!-- parte dos botões de simulação
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_fake_data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="Adicionar Dado de Teste"
-        app:srcCompat="@android:drawable/ic_input_add"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="159dp"
-        tools:layout_editor_absoluteY="699dp" />-->
-
 </androidx.constraintlayout.widget.ConstraintLayout>
