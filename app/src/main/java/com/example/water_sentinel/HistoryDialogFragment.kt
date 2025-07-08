@@ -19,6 +19,7 @@ import java.util.Locale
 import android.os.Build
 import android.widget.ImageButton
 import android.widget.ScrollView
+import android.util.TypedValue
 import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
@@ -71,6 +72,8 @@ class HistoryDialogFragment : DialogFragment() {
         val window = dialog?.window ?: return
         window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
 
+        val titleTextSizeFactor = 0.05f
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowMetrics = requireActivity().windowManager.currentWindowMetrics
             val screenWidth = windowMetrics.bounds.width()
@@ -82,10 +85,13 @@ class HistoryDialogFragment : DialogFragment() {
 
             window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
 
+            val density = resources.displayMetrics.scaledDensity
+            val titleSp = (screenWidth * titleTextSizeFactor) / density
+            tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, titleSp)
+
             val titleSizeFactor = 0.022f
             val iconSizeFactor = 0.08f
 
-            tvTitle.textSize = screenWidth * titleSizeFactor
 
             val iconSize = (screenWidth * iconSizeFactor).toInt()
             btnClose.layoutParams.width = iconSize
@@ -107,7 +113,10 @@ class HistoryDialogFragment : DialogFragment() {
             val scrollHeightFactor = 0.40
 
             window.setLayout((screenWidth * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
-            tvTitle.textSize = screenWidth * titleSizeFactor
+
+            val density = resources.displayMetrics.scaledDensity
+            val titleSp = (screenWidth * titleTextSizeFactor) / density
+            tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, titleSp)
 
             val iconSize = (screenWidth * iconSizeFactor).toInt()
             btnClose.layoutParams.width = iconSize
