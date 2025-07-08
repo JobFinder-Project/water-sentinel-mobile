@@ -124,6 +124,10 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
 
 
         // --- CONFIGURAÇÃO DOS CLIQUES NOS CARDS ---
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_flood_risk).setOnClickListener {
+            showHistoryDialog("percentage", "Histórico de Risco")
+        }
+
         findViewById<LinearLayout>(R.id.card_humidity).setOnClickListener {
             showHistoryDialog("humidity", "Histórico de Umidade")
         }

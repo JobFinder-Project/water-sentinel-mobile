@@ -61,6 +61,7 @@
                 android:textColor="@android:color/black"/>
 
             <TextView
+                android:id="@+id/header_data"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
