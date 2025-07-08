@@ -18,13 +18,12 @@
             android:layout_gravity="center"
             android:text="@string/title_dialog"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
             android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/btn_close_dialog"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/descricao_dialog"

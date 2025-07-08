@@ -24,7 +24,11 @@ import androidx.core.graphics.drawable.toDrawable
 class HistoryDialogFragment : DialogFragment() {
 
     private lateinit var todoDao: TodoDao
+    private lateinit var tvTitle: TextView
+    private lateinit var btnClose: ImageButton
     private lateinit var scrollView: ScrollView
+    private lateinit var container: LinearLayout
+
 
     companion object {
         private const val ARG_METRIC_TYPE = "metric_type"
@@ -50,10 +54,9 @@ class HistoryDialogFragment : DialogFragment() {
         val metricType = arguments?.getString(ARG_METRIC_TYPE) ?: return
         val title = arguments?.getString(ARG_METRIC_TITLE) ?: "Histórico"
 
-        val tvTitle: TextView = view.findViewById(R.id.dialog_title)
-        val container: LinearLayout = view.findViewById(R.id.ll_dialog_history_container)
-        val btnClose: ImageButton = view.findViewById(R.id.btn_close_dialog)
-
+        tvTitle = view.findViewById(R.id.dialog_title)
+        container = view.findViewById(R.id.ll_dialog_history_container)
+        btnClose = view.findViewById(R.id.btn_close_dialog)
         scrollView = view.findViewById(R.id.sv_history_container)
 
         tvTitle.text = title
@@ -70,13 +73,26 @@ class HistoryDialogFragment : DialogFragment() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowMetrics = requireActivity().windowManager.currentWindowMetrics
-            val insets = windowMetrics.windowInsets.getInsets(android.view.WindowInsets.Type.systemBars())
-            val width = windowMetrics.bounds.width() - insets.left - insets.right
             val screenWidth = windowMetrics.bounds.width()
             val screenHeight = windowMetrics.bounds.height()
+
+
+            val insets = windowMetrics.windowInsets.getInsets(android.view.WindowInsets.Type.systemBars())
+            val width = windowMetrics.bounds.width() - insets.left - insets.right
+
             window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
 
+            val titleSizeFactor = 0.022f
+            val iconSizeFactor = 0.08f
+
+            tvTitle.textSize = screenWidth * titleSizeFactor
+
+            val iconSize = (screenWidth * iconSizeFactor).toInt()
+            btnClose.layoutParams.width = iconSize
+            btnClose.layoutParams.height = iconSize
+
             scrollView.layoutParams.height = (screenHeight * 0.177).toInt()
+
         } else {
             @Suppress("DEPRECATION")
             val displayMetrics = android.util.DisplayMetrics()
@@ -85,8 +101,17 @@ class HistoryDialogFragment : DialogFragment() {
             val width = displayMetrics.widthPixels
             val screenWidth = displayMetrics.widthPixels
             val screenHeight = displayMetrics.heightPixels
-            window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
 
+            val titleSizeFactor = 0.06f
+            val iconSizeFactor = 0.08f
+            val scrollHeightFactor = 0.40
+
+            window.setLayout((screenWidth * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+            tvTitle.textSize = screenWidth * titleSizeFactor
+
+            val iconSize = (screenWidth * iconSizeFactor).toInt()
+            btnClose.layoutParams.width = iconSize
+            btnClose.layoutParams.height = iconSize
             scrollView.layoutParams.height = (screenHeight * 0.177).toInt()
 
         }
