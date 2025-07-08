@@ -57,12 +57,14 @@ import kotlinx.coroutines.launch
 import java.time.ZoneId
 
 
-class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
+class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialogFragment.OnDialogDismissListener {
     companion object {
         private const val CODIGO_PERMISSAO_NOTIFICACAO = 1001
         private const val CODIGO_PERMISSAO_LOCALIZACAO = 1002
         private const val TAG = "DashboardActivity" // Tag para logs
+        private const val DIALOG_TAG = "HistoryDialog"
     }
+    private var isDialogCurrentlyShowing = false
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -142,6 +144,10 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
         handler.post(statusCheckRunnable)
+    }
+    override fun onDialogDismissed() {
+        isDialogCurrentlyShowing = false // Destrava
+        Log.d(TAG, "Dialog fechado. Trava liberada.")
     }
 
     // ------------ DADOS -----------
@@ -231,6 +237,14 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     private fun showHistoryDialog(metricType: String, title: String) {
+        if (isDialogCurrentlyShowing) {
+            Log.d(TAG, "Um diálogo já está sendo exibido. Clique em '$title' ignorado.")
+            return
+        }
+
+        isDialogCurrentlyShowing = true
+        Log.d(TAG, "Abrindo diálogo para '$title'. Trava ativada.")
+
         val dialog = HistoryDialogFragment.newInstance(metricType, title)
         dialog.show(supportFragmentManager, "HistoryDialog")
     }
