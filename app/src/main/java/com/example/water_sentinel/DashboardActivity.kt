@@ -663,9 +663,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                 // Verifica se há um "furo" no tempo
                 if (reading.timestamp - lastTimestamp > GAP_THRESHOLD_MINUTES) {
                     // Se houver um furo, "fecha" os segmentos atuais e os adiciona à lista principal
-                    if (tempEntries.isNotEmpty()) temperatureSegments.add(createDataSet(tempEntries, "Temperatura", Color.RED, YAxis.AxisDependency.LEFT))
-                    if (humidityEntries.isNotEmpty()) humiditySegments.add(createDataSet(humidityEntries, "Umidade", Color.BLUE, YAxis.AxisDependency.LEFT))
-                    if (pressureEntries.isNotEmpty()) pressureSegments.add(createDataSet(pressureEntries, "Pressão", Color.MAGENTA, YAxis.AxisDependency.RIGHT))
+                    if (tempEntries.isNotEmpty()) temperatureSegments.add(createDataSet(tempEntries, if (temperatureSegments.isEmpty()) "Temperatura" else "", Color.RED, YAxis.AxisDependency.LEFT))
+                    if (humidityEntries.isNotEmpty()) humiditySegments.add(createDataSet(humidityEntries, if (temperatureSegments.isEmpty()) "Umidade" else "", Color.BLUE, YAxis.AxisDependency.LEFT))
+                    if (pressureEntries.isNotEmpty()) pressureSegments.add(createDataSet(pressureEntries, if (temperatureSegments.isEmpty()) "Pressão" else "", Color.MAGENTA, YAxis.AxisDependency.RIGHT))
 
                     // Limpa as listas para começar um novo segmento
                     tempEntries = mutableListOf()
@@ -684,9 +684,10 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
             }
 
             // Adiciona o último segmento que ficou aberto
-            if (tempEntries.isNotEmpty()) temperatureSegments.add(createDataSet(tempEntries, "Temperatura", Color.RED, YAxis.AxisDependency.LEFT))
-            if (humidityEntries.isNotEmpty()) humiditySegments.add(createDataSet(humidityEntries, "Umidade", Color.BLUE, YAxis.AxisDependency.LEFT))
-            if (pressureEntries.isNotEmpty()) pressureSegments.add(createDataSet(pressureEntries, "Pressão", Color.MAGENTA, YAxis.AxisDependency.RIGHT))
+            if (tempEntries.isNotEmpty()) temperatureSegments.add(createDataSet(tempEntries, if (temperatureSegments.isEmpty()) "Temperatura" else "", Color.RED, YAxis.AxisDependency.LEFT))
+            if (humidityEntries.isNotEmpty()) humiditySegments.add(createDataSet(humidityEntries, if (humiditySegments.isEmpty()) "Umidade" else "", Color.BLUE, YAxis.AxisDependency.LEFT))
+            if (pressureEntries.isNotEmpty()) pressureSegments.add(createDataSet(pressureEntries, if (pressureSegments.isEmpty()) "Pressão" else "", Color.MAGENTA, YAxis.AxisDependency.RIGHT))
+
 
             // Combina todos os segmentos de todas as métricas em uma única lista
             val allDataSets = mutableListOf<com.github.mikephil.charting.interfaces.datasets.ILineDataSet>()
@@ -709,8 +710,12 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         return LineDataSet(entries, label).apply {
             this.color = color
             this.axisDependency = axis
-            this.setDrawCircles(false)
-            this.lineWidth = 2f
+            this.setDrawValues(false) // Não desenha os valores em cima da linha
+            this.setDrawCircles(true) // Desenha um círculo em cada ponto de dado
+            this.setCircleColor(color)
+            this.circleRadius = 3f
+            this.setDrawCircleHole(false)
+            this.lineWidth = 1.5f
         }
     }
 
