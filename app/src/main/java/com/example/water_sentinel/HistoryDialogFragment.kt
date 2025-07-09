@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.os.Build
+import android.preference.PreferenceActivity.Header
 import android.widget.ImageButton
 import android.widget.ScrollView
 import android.util.TypedValue
@@ -31,6 +32,7 @@ class HistoryDialogFragment : DialogFragment() {
     private lateinit var btnClose: ImageButton
     private lateinit var scrollView: ScrollView
     private lateinit var container: LinearLayout
+    private lateinit var HeaderData: TextView
 
 
     companion object {
@@ -66,6 +68,11 @@ class HistoryDialogFragment : DialogFragment() {
         container = view.findViewById(R.id.ll_dialog_history_container)
         btnClose = view.findViewById(R.id.btn_close_dialog)
         scrollView = view.findViewById(R.id.sv_history_container)
+        HeaderData = view.findViewById(R.id.header_data)
+        HeaderData.text = when (metricType) {
+            "percentage" -> "Risco"
+            else -> "Dados"
+        }
 
         tvTitle.text = title
         btnClose.setOnClickListener { dismiss() }
@@ -176,6 +183,7 @@ class HistoryDialogFragment : DialogFragment() {
                             "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
                             "card_precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
                             "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N/A"
+                            "percentage" -> reading.percentage?.let { "$it%" } ?: "N/A"
                             else -> "N/A"
                         }
 
