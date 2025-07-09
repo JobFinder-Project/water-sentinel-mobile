@@ -43,6 +43,9 @@
     <string name="sem_dados_data">--/--/--</string>
     <string name="sem_dados_hora">--:--:--</string>
 
+    <!-- Graficos -->
+    <string name="analise">Analytics</string>
+
 
     <!-- Riscos Alert -->
     <string name="risk_0_no_risk">Sem Risco</string>
