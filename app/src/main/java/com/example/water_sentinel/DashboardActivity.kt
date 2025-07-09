@@ -8,11 +8,13 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -52,9 +54,19 @@ import java.time.format.DateTimeFormatter
 import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
 import com.example.water_sentinel.db.DataHistory
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.time.ZoneId
+import java.util.Date
+import java.util.Locale
 
 
 class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialogFragment.OnDialogDismissListener {
@@ -85,6 +97,8 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
     private lateinit var txtvolume: TextView
     private lateinit var txtPercentual: TextView
     private lateinit var txtStatus: TextView
+    private lateinit var lineChart: com.github.mikephil.charting.charts.LineChart
+
 
 
     private val handler = Handler(Looper.getMainLooper())
@@ -100,11 +114,13 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         // Captura o mapa
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
+        lineChart = findViewById(R.id.line_chart)
 
         solicitarPermissaoNotificacao()
-
         setupFirebaseListener()
+        setupChartInteraction()
+        populateChartData()
+
 
         txtTemp = findViewById<TextView>(R.id.tv_temperature)
         txtUmi = findViewById<TextView>(R.id.tv_humidity)
@@ -138,6 +154,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
             showHistoryDialog("card_precipitation", "Histórico de Precipitação")
         }
 
+        /*lineChart = findViewById(R.id.line_chart)
+        setupChartInteraction()
+        populateChartData()*/
 
 
         // isso abaixo verifica o status para ver se o embarcado continua mandando dados
@@ -206,6 +225,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                             status = status
                         )
                         todoDao.insert(currentReading)
+                        populateChartData()
 
                     }
                 }
@@ -387,6 +407,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                         val dataHora = LocalDateTime.of(data, hora)
 
                         ultimoTimestampRecebido = dataHora.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                        populateChartData()
                     } catch (e: Exception) {
                         Log.e("DateTime", "Erro ao parsear data/hora do Firebase", e)
                     }
@@ -581,6 +602,143 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         drawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
+
+    /*-------------Grafico----------------*/
+    private fun setupChartInteraction() {
+        val expandButton = findViewById<TextView>(R.id.tv_expand_chart)
+        expandButton.setOnClickListener {
+            Log.d("ChartClick", "Botão de expandir o gráfico FOI CLICADO!")
+
+            if (lineChart.visibility == View.VISIBLE) {
+                // Animação para DESAPARECER
+                lineChart.animate()
+                    .alpha(0f) // Leva a transparência para 0
+                    .setDuration(300) // Duração de 300 milissegundos
+                    .withEndAction {
+                        // Ao final da animação, define a visibilidade como GONE
+                        lineChart.visibility = View.GONE
+                    }
+            } else {
+                // Animação para APARECER
+                lineChart.alpha = 0f // Começa totalmente transparente
+                lineChart.visibility = View.VISIBLE // Torna o espaço visível
+                lineChart.animate()
+                    .alpha(1f) // Leva a transparência para 100%
+                    .setDuration(300)
+                    .withEndAction(null) // Limpa qualquer ação final anterior
+            }
+        }
+    }
+
+    private fun populateChartData() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            // Define o início do dia de hoje para a consulta
+            val startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val readings = todoDao.getReadingsFrom(startOfDay)
+
+            if (readings.isEmpty()) {
+                withContext(Dispatchers.Main) {
+                    lineChart.clear() // Limpa o gráfico se não houver dados
+                    lineChart.invalidate()
+                }
+                return@launch
+            }
+
+            // --- Lógica para criar segmentos de linha com "furos" ---
+            val GAP_THRESHOLD_MINUTES = 5 * 60 * 1000 // 5 minutos em milissegundos
+
+            // Listas que guardarão os vários segmentos de linha para cada métrica
+            val temperatureSegments = mutableListOf<com.github.mikephil.charting.interfaces.datasets.ILineDataSet>()
+            val humiditySegments = mutableListOf<com.github.mikephil.charting.interfaces.datasets.ILineDataSet>()
+            val pressureSegments = mutableListOf<com.github.mikephil.charting.interfaces.datasets.ILineDataSet>()
+
+            // Listas temporárias para os pontos do segmento atual
+            var tempEntries = mutableListOf<com.github.mikephil.charting.data.Entry>()
+            var humidityEntries = mutableListOf<com.github.mikephil.charting.data.Entry>()
+            var pressureEntries = mutableListOf<com.github.mikephil.charting.data.Entry>()
+
+            var lastTimestamp = readings.first().timestamp
+
+            for (reading in readings) {
+                // Verifica se há um "furo" no tempo
+                if (reading.timestamp - lastTimestamp > GAP_THRESHOLD_MINUTES) {
+                    // Se houver um furo, "fecha" os segmentos atuais e os adiciona à lista principal
+                    if (tempEntries.isNotEmpty()) temperatureSegments.add(createDataSet(tempEntries, "Temperatura", Color.RED, YAxis.AxisDependency.LEFT))
+                    if (humidityEntries.isNotEmpty()) humiditySegments.add(createDataSet(humidityEntries, "Umidade", Color.BLUE, YAxis.AxisDependency.LEFT))
+                    if (pressureEntries.isNotEmpty()) pressureSegments.add(createDataSet(pressureEntries, "Pressão", Color.MAGENTA, YAxis.AxisDependency.RIGHT))
+
+                    // Limpa as listas para começar um novo segmento
+                    tempEntries = mutableListOf()
+                    humidityEntries = mutableListOf()
+                    pressureEntries = mutableListOf()
+                }
+
+                // Adiciona o ponto atual às listas de segmento
+                //val xValue = (reading.timestamp % (24 * 60 * 60 * 1000)).toFloat() // Eixo X como milissegundos do dia
+                val xValue = reading.timestamp.toFloat()
+                reading.temperature?.let { tempEntries.add(Entry(xValue, it)) }
+                reading.humidity?.let { humidityEntries.add(Entry(xValue, it.toFloat())) }
+                reading.pressure?.let { pressureEntries.add(Entry(xValue, it.toFloat())) }
+
+                lastTimestamp = reading.timestamp
+            }
+
+            // Adiciona o último segmento que ficou aberto
+            if (tempEntries.isNotEmpty()) temperatureSegments.add(createDataSet(tempEntries, "Temperatura", Color.RED, YAxis.AxisDependency.LEFT))
+            if (humidityEntries.isNotEmpty()) humiditySegments.add(createDataSet(humidityEntries, "Umidade", Color.BLUE, YAxis.AxisDependency.LEFT))
+            if (pressureEntries.isNotEmpty()) pressureSegments.add(createDataSet(pressureEntries, "Pressão", Color.MAGENTA, YAxis.AxisDependency.RIGHT))
+
+            // Combina todos os segmentos de todas as métricas em uma única lista
+            val allDataSets = mutableListOf<com.github.mikephil.charting.interfaces.datasets.ILineDataSet>()
+            allDataSets.addAll(temperatureSegments)
+            allDataSets.addAll(humiditySegments)
+            allDataSets.addAll(pressureSegments)
+
+            val lineData = com.github.mikephil.charting.data.LineData(allDataSets)
+
+            withContext(Dispatchers.Main) {
+                configureChartAppearance(readings.first().timestamp, readings.last().timestamp)
+                lineChart.data = lineData
+                lineChart.invalidate()
+            }
+        }
+    }
+
+    // Crie esta função auxiliar para evitar repetição de código
+    private fun createDataSet(entries: List<Entry>, label: String, color: Int, axis: YAxis.AxisDependency): LineDataSet {
+        return LineDataSet(entries, label).apply {
+            this.color = color
+            this.axisDependency = axis
+            this.setDrawCircles(false)
+            this.lineWidth = 2f
+        }
+    }
+
+    // Modifique a configuração para formatar o eixo X como hora
+    private fun configureChartAppearance(startTime: Long, endTime: Long) {
+        lineChart.description.isEnabled = false
+        lineChart.setDrawGridBackground(false)
+        lineChart.axisRight.isEnabled = true // Habilita o eixo Y da direita
+
+        val xAxis = lineChart.xAxis
+        xAxis.position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
+
+        // Este formatador usa os timestamps para exibir a hora correta no eixo X
+        xAxis.valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
+            private val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+            override fun getFormattedValue(value: Float): String {
+                // value é o timestamp em milissegundos
+                return sdf.format(Date(value.toLong()))
+            }
+        }
+        xAxis.labelRotationAngle = -45f
+        // Opcional: Define os limites mínimo e máximo do eixo X
+        // xAxis.axisMinimum = startTime.toFloat()
+        // xAxis.axisMaximum = endTime.toFloat()
+    }
+
+    /*----------Localização--------------------*/
+
 
     // Função que verifica a permissão de localizacao
     private fun checarPermissaoLocalizacao() {

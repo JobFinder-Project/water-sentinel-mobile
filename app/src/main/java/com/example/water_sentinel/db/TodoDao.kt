@@ -11,5 +11,8 @@ interface TodoDao {
 
         @Query("SELECT * FROM DataHistory ORDER BY timestamp DESC LIMIT 15")
         suspend fun getLatestFiveReadings(): List<DataHistory>
+
+        @Query("SELECT * FROM DataHistory WHERE timestamp >= :startTime ORDER BY timestamp ASC")
+        suspend fun getReadingsFrom(startTime: Long): List<DataHistory>
     }
 
