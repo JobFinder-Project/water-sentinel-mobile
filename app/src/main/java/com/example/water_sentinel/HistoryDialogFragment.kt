@@ -1,5 +1,7 @@
 package com.example.water_sentinel
 
+import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,10 +18,20 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.os.Build
+import android.widget.ImageButton
+import android.widget.ScrollView
+import android.util.TypedValue
+import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
 
     private lateinit var todoDao: TodoDao
+    private lateinit var tvTitle: TextView
+    private lateinit var btnClose: ImageButton
+    private lateinit var scrollView: ScrollView
+    private lateinit var container: LinearLayout
+
 
     companion object {
         private const val ARG_METRIC_TYPE = "metric_type"
@@ -33,6 +45,11 @@ class HistoryDialogFragment : DialogFragment() {
             return HistoryDialogFragment().apply { arguments = args }
         }
     }
+    interface OnDialogDismissListener {
+        fun onDialogDismissed()
+    }
+
+    private var listener: OnDialogDismissListener? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_history, container, false)
@@ -45,14 +62,89 @@ class HistoryDialogFragment : DialogFragment() {
         val metricType = arguments?.getString(ARG_METRIC_TYPE) ?: return
         val title = arguments?.getString(ARG_METRIC_TITLE) ?: "Histórico"
 
-        val tvTitle: TextView = view.findViewById(R.id.dialog_title)
-        val container: LinearLayout = view.findViewById(R.id.ll_dialog_history_container)
-        val btnClose: Button = view.findViewById(R.id.btn_close_dialog)
+        tvTitle = view.findViewById(R.id.dialog_title)
+        container = view.findViewById(R.id.ll_dialog_history_container)
+        btnClose = view.findViewById(R.id.btn_close_dialog)
+        scrollView = view.findViewById(R.id.sv_history_container)
 
         tvTitle.text = title
         btnClose.setOnClickListener { dismiss() }
 
         loadHistory(metricType, container)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        val window = dialog?.window ?: return
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+
+        val titleTextSizeFactor = 0.05f
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowMetrics = requireActivity().windowManager.currentWindowMetrics
+            val screenWidth = windowMetrics.bounds.width()
+            val screenHeight = windowMetrics.bounds.height()
+
+
+            val insets = windowMetrics.windowInsets.getInsets(android.view.WindowInsets.Type.systemBars())
+            val width = windowMetrics.bounds.width() - insets.left - insets.right
+
+            window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            val density = resources.displayMetrics.scaledDensity
+            val titleSp = (screenWidth * titleTextSizeFactor) / density
+            tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, titleSp)
+
+            val titleSizeFactor = 0.022f
+            val iconSizeFactor = 0.08f
+
+
+            val iconSize = (screenWidth * iconSizeFactor).toInt()
+            btnClose.layoutParams.width = iconSize
+            btnClose.layoutParams.height = iconSize
+
+            scrollView.layoutParams.height = (screenHeight * 0.177).toInt()
+
+        } else {
+            @Suppress("DEPRECATION")
+            val displayMetrics = android.util.DisplayMetrics()
+            @Suppress("DEPRECATION")
+            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+            val width = displayMetrics.widthPixels
+            val screenWidth = displayMetrics.widthPixels
+            val screenHeight = displayMetrics.heightPixels
+
+            val titleSizeFactor = 0.06f
+            val iconSizeFactor = 0.08f
+            val scrollHeightFactor = 0.40
+
+            window.setLayout((screenWidth * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            val density = resources.displayMetrics.scaledDensity
+            val titleSp = (screenWidth * titleTextSizeFactor) / density
+            tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, titleSp)
+
+            val iconSize = (screenWidth * iconSizeFactor).toInt()
+            btnClose.layoutParams.width = iconSize
+            btnClose.layoutParams.height = iconSize
+            scrollView.layoutParams.height = (screenHeight * 0.177).toInt()
+
+        }
+    }
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnDialogDismissListener) {
+            listener = context
+        } else {
+            throw RuntimeException("$context must implement OnDialogDismissListener")
+        }
+    }
+
+    // Este método é chamado quando o diálogo é dispensado (fechado)
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        listener?.onDialogDismissed() // Avisa a DashboardActivity
     }
 
     private fun loadHistory(type: String, container: LinearLayout) {
@@ -64,25 +156,30 @@ class HistoryDialogFragment : DialogFragment() {
                 if (latestReadings.isEmpty()) {
                     container.addView(TextView(requireContext()).apply { text = "Nenhum histórico disponível." })
                 } else {
-                    val dateFormat = SimpleDateFormat("dd/MM/yy HH:mm:ss", Locale.getDefault())
-                    for (reading in latestReadings) {
-                        val formattedDate = dateFormat.format(Date(reading.timestamp))
+                    val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+                    val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                    val inflater = LayoutInflater.from(context)
 
-                        val valueToDisplay = when (type) {
+                    for (reading in latestReadings) {
+                        val rowView = inflater.inflate(R.layout.list_item_history, container, false)
+
+                        val tvDate = rowView.findViewById<TextView>(R.id.tv_history_date)
+                        val tvTime = rowView.findViewById<TextView>(R.id.tv_history_time)
+                        val tvData = rowView.findViewById<TextView>(R.id.tv_history_data)
+
+                        val date = Date(reading.timestamp)
+                        tvDate.text = dateFormat.format(date)
+                        tvTime.text = timeFormat.format(date)
+
+                        tvData.text = when (type) {
                             "humidity" -> reading.humidity?.let { "$it%" } ?: "N/A"
                             "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
                             "card_precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
-                            "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N.A"
-
-                            else -> "Tipo desconhecido"
+                            "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N/A"
+                            else -> "N/A"
                         }
 
-                        val historyEntryText = "$formattedDate:  $valueToDisplay"
-                        container.addView(TextView(requireContext()).apply {
-                            text = historyEntryText
-                            textSize = 16f
-                            setPadding(0, 8, 0, 8)
-                        })
+                        container.addView(rowView)
                     }
                 }
             }

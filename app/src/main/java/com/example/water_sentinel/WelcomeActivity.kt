@@ -19,7 +19,7 @@ class WelcomeActivity : AppCompatActivity() {
             val intent = Intent(this, DashboardActivity::class.java)
             startActivity(intent)
             finish()
-        }, 3000)
+        }, 900)
     }
 
 }

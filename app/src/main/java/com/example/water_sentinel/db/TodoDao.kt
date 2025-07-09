@@ -9,7 +9,7 @@ interface TodoDao {
         @Insert
         suspend fun insert(reading: DataHistory)
 
-        @Query("SELECT * FROM DataHistory ORDER BY timestamp DESC LIMIT 5")
+        @Query("SELECT * FROM DataHistory ORDER BY timestamp DESC LIMIT 15")
         suspend fun getLatestFiveReadings(): List<DataHistory>
     }
 
