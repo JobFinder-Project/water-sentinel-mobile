@@ -725,6 +725,11 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         lineChart.setDrawGridBackground(false)
         lineChart.axisRight.isEnabled = true // Habilita o eixo Y da direita
 
+        //val mv = CustomMarkerView(this, R.layout.marker_view)
+        val mv = CustomMarkerView(this, R.layout.marker_view, lineChart)
+        mv.chartView = lineChart // Opcional, mas ajuda o marcador a não sair da tela
+        lineChart.marker = mv
+
         val xAxis = lineChart.xAxis
         xAxis.position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
 
