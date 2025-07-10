@@ -1,0 +1,80 @@
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tv_details_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Análise Detalhada"
+            android:textSize="24sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:text="Risco (%)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart_risk"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@drawable/card_background_white"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:text="Temperatura (°C)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart_temperature"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@drawable/card_background_white"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:text="Umidade (°C)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart_humidity"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@drawable/card_background_white"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:text="Pressão (hPa)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart_pressure"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@drawable/card_background_white"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:text="Precipitação (mm)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart_flood_level"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@drawable/card_background_white"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
