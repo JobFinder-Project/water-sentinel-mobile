@@ -233,10 +233,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         binding.tvPostoNome.text = posto.nome
         binding.tvPostoStatus.text = "Status: ${getStatusText(posto.status)}"
         binding.tvPostoStatus.setTextColor(getStatusColor(posto.status))
-        binding.tvRiscoPorcentagem.text = "Risco: ${posto.riscoPorcentagem}"
-        binding.tvUmidade.text = "Umidade: ${posto.umidade}"
-        binding.tvTemperatura.text = "Temperatura: ${posto.temperatura}"
-        binding.tvPressao.text = "Pressão: ${posto.pressao}"
+        binding.tvRiscoPorcentagem.text = "Risco: ${posto.riscoPorcentagem}%"
+        binding.tvUmidade.text = "Umidade: ${posto.umidade}%"
+        binding.tvTemperatura.text = "Temperatura: ${posto.temperatura}°C"
+        binding.tvPressao.text = "Pressão: ${posto.pressao}hPa"
 
         // Localizaçãao
         binding.tvEndereco.text = "${posto.endereco.rua}, ${posto.endereco.bairro}, ${"${posto.endereco.cidade}/${posto.endereco.estado}"}"
