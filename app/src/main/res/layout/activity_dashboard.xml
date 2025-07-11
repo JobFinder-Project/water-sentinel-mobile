@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background_gradient"
     android:fillViewport="true"
     tools:context=".DashboardActivity">
 
@@ -14,7 +15,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background_gradient"
+        android:layout_marginTop="25dp"
         android:id="@+id/main"
         tools:context=".DashboardActivity"
         android:scrollY="@dimen/cardview_default_radius">

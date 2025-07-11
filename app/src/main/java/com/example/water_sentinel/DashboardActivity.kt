@@ -422,7 +422,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
             if (isSystemActive) {
                 isSystemActive = false
                 txtStatus.text = "Sistema inativo"
-                clearDashboardData() // Limpa a UI
+                clearDashboardData()
             }
         } else {
             if (!isSystemActive) {
@@ -481,12 +481,12 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         }
     }
 
-    // Função auxiliar para verificar a permissão antes de tentar enviar uma notificação
+    // função auxiliar para verificar a permissão antes de tentar enviar uma notificação
     private fun checarPermissaoNotificacao(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         }
-        return true // Para versões anteriores ao Android 13, a permissão é concedida por padrão
+        return true
     }
 
     // Função que realiza a solicitação da permissão de notificações

@@ -1,34 +1,55 @@
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/background_gradient"
     android:fitsSystemWindows="true"
-    android:background="@drawable/background_gradient">
+    tools:context=".DetailsActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_details"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/transparent"
+        app:titleTextColor="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Análise Detalhada"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:foregroundGravity="center"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_details"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="30dp"
         android:padding="16dp">
-
-        <TextView
-            android:id="@+id/tv_details_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Análise Detalhada"
-            android:textSize="24sp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp"/>
 
         <TextView
             android:text="Risco (%)"
             android:id="@+id/header_risk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:layout_marginStart="14dp"
             android:layout_marginEnd="14dp"
             android:textColor="@color/white"
@@ -38,7 +59,7 @@
             android:drawableEnd="@drawable/expand_less"
             android:background="@drawable/item_background"
             android:clickable="true"
-            android:focusable="true" />
+            android:focusable="true"/>
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/chart_risk"
@@ -160,3 +181,4 @@
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

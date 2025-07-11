@@ -1,28 +1,22 @@
 package com.example.water_sentinel
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.water_sentinel.db.DataHistory // Use o nome da sua classe de entidade
-import com.example.water_sentinel.db.TodoDao     // Use o nome do seu DAO
+import com.example.water_sentinel.db.DataHistory
+import com.example.water_sentinel.db.TodoDao
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.distinctUntilChanged
 import com.github.mikephil.charting.components.Legend
 import kotlinx.coroutines.launch
-import android.view.ViewGroup
-import androidx.transition.TransitionManager
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -30,7 +24,7 @@ import java.util.*
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
-import kotlin.collections.ArrayList
+import androidx.appcompat.widget.Toolbar
 
 class DetailsActivity : AppCompatActivity() {
 
@@ -43,17 +37,27 @@ class DetailsActivity : AppCompatActivity() {
 
 
     private val chartDataBuffer = mutableListOf<DataHistory>()
-    private val MAX_CHART_ENTRIES = 100 // O tamanho da nossa "janela deslizante"
+    private val MAX_CHART_ENTRIES = 100
     private var isAnimating: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_details)
 
-        // Assumindo que seu DAO se chama todoDao() no AppDatabase
+
+        val toolbar: Toolbar = findViewById(R.id.toolbar_details)
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.apply {
+            title = null
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_arrow_back)
+        }
+
         todoDao = (application as MyApp).database.todoDao()
 
-        // Inicializa as views dos gráficos
+        // inicializa as views dos gráficos
         chartRisk = findViewById(R.id.chart_risk)
         chartTemp = findViewById(R.id.chart_temperature)
         chartUmid = findViewById(R.id.chart_humidity)
@@ -81,28 +85,39 @@ class DetailsActivity : AppCompatActivity() {
         setupChartTouchListener(chartPrecip)
     }
 
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+
+            val intent = Intent(this, DashboardActivity::class.java)
+
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+
     private fun setupExpandableChart(header: TextView, chart: LineChart) {
         header.setOnClickListener {
-            // Se uma animação já estiver em progresso, ignora o clique.
             if (isAnimating) {
                 return@setOnClickListener
             }
 
-            // Ativa a trava para bloquear outros cliques.
             isAnimating = true
 
             if (chart.visibility == View.VISIBLE) {
-                // Lógica para ESCONDER o gráfico
+
                 header.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_expand_more, 0)
                 chart.animate()
                     .alpha(0f)
                     .setDuration(300)
                     .withEndAction {
                         chart.visibility = View.GONE
-                        isAnimating = false // Libera a trava no final da animação
+                        isAnimating = false
                     }
             } else {
-                // Lógica para MOSTRAR o gráfico
+
                 header.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.expand_less, 0)
                 chart.alpha = 0f
                 chart.visibility = View.VISIBLE
@@ -110,54 +125,16 @@ class DetailsActivity : AppCompatActivity() {
                     .alpha(1f)
                     .setDuration(300)
                     .withEndAction {
-                        isAnimating = false // Libera a trava no final da animação
+                        isAnimating = false
                     }
             }
         }
-    }
-
-    private fun loadInitialDataAndObserve() {
-        lifecycleScope.launch {
-            // 1. Carrega os dados iniciais uma única vez
-            val initialReadings = todoDao.getLatestReadings(MAX_CHART_ENTRIES)
-            chartDataBuffer.clear()
-            // Adicionamos em ordem cronológica (o mais antigo primeiro)
-            chartDataBuffer.addAll(initialReadings.reversed())
-            updateAllCharts(chartDataBuffer)
-
-            // 2. Começa a observar apenas o último dado inserido
-            todoDao.getLatestReadingFlow()
-                .distinctUntilChanged() // Só nos notifica se o último dado realmente mudou
-                .collect { newReading ->
-                    if (newReading != null) {
-                        addRealTimePoint(newReading)
-                    }
-                }
-        }
-    }
-    // Função para adicionar um novo ponto e manter o tamanho da fila
-    private fun addRealTimePoint(newReading: DataHistory) {
-        // Evita adicionar o mesmo ponto duas vezes
-        if (chartDataBuffer.lastOrNull()?.id == newReading.id) {
-            return
-        }
-
-        chartDataBuffer.add(newReading) // Adiciona o novo no final
-
-        if (chartDataBuffer.size > MAX_CHART_ENTRIES) {
-            chartDataBuffer.removeAt(0) // Remove o mais antigo do início
-        }
-
-        // Manda a lista atualizada para os gráficos
-        updateAllCharts(chartDataBuffer)
     }
 
     private fun observeChartData() {
         lifecycleScope.launch {
             val startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-            // Se inscreve no Flow. O bloco 'collect' será executado
-            // imediatamente com os dados atuais e depois toda vez que os dados mudarem.
             todoDao.getReadingsFrom(startOfDay).collect { readings ->
                 updateAllCharts(readings)
             }
@@ -174,14 +151,12 @@ class DetailsActivity : AppCompatActivity() {
             return
         }
 
-        // A lógica de processamento de dados agora fica aqui
         val riskDataSets = createLineSegments(readings, "Risco", Color.GREEN) { it.percentage?.toFloat() }
         val tempDataSets = createLineSegments(readings, "Temperatura", Color.RED) { it.temperature }
         val umidDataSets = createLineSegments(readings, "Umidade", Color.BLUE) { it.humidity?.toFloat() }
         val presDataSets = createLineSegments(readings, "Pressão", Color.MAGENTA) { it.pressure?.toFloat() }
         val precipDataSets = createLineSegments(readings, "Precipitação", Color.CYAN) { it.precipitation }
 
-        // A atualização da UI deve acontecer na thread principal
         lifecycleScope.launch(Dispatchers.Main) {
             displayChartData(chartRisk, riskDataSets)
             displayChartData(chartTemp, tempDataSets)
@@ -192,7 +167,6 @@ class DetailsActivity : AppCompatActivity() {
     }
 
 
-    // Função genérica para criar os segmentos de linha com os "furos"
     private fun createLineSegments(
         readings: List<DataHistory>,
         label: String,
@@ -209,8 +183,7 @@ class DetailsActivity : AppCompatActivity() {
         for (reading in readings) {
             if (reading.timestamp - lastTimestamp > GAP_THRESHOLD_MINUTES) {
                 if (currentSegmentEntries.isNotEmpty()) {
-                    // Ao criar o segmento, verificamos se é o primeiro.
-                    // Se for, passamos showInLegend = true. Senão, false.
+
                     segments.add(createStyledDataSet(currentSegmentEntries, label, color, segments.isEmpty()))
                 }
                 currentSegmentEntries = mutableListOf()
@@ -221,7 +194,6 @@ class DetailsActivity : AppCompatActivity() {
             lastTimestamp = reading.timestamp
         }
 
-        // Adiciona o último segmento que ficou aberto
         if (currentSegmentEntries.isNotEmpty()) {
             segments.add(createStyledDataSet(currentSegmentEntries, label, color, segments.isEmpty()))
         }
@@ -229,7 +201,6 @@ class DetailsActivity : AppCompatActivity() {
         return segments
     }
 
-    // Função para aplicar os dados e o estilo a um gráfico
     private fun displayChartData(chart: LineChart, dataSets: List<LineDataSet>) {
         if (dataSets.isEmpty()) {
             chart.clear()
@@ -239,7 +210,6 @@ class DetailsActivity : AppCompatActivity() {
         val lineData = LineData(dataSets)
         lineData.setDrawValues(false)
 
-        // Configura a aparência geral do gráfico
         chart.apply {
             // --- Configurações Visuais ---
             description.isEnabled = false
@@ -250,15 +220,15 @@ class DetailsActivity : AppCompatActivity() {
             // --- Configurações de Interatividade ---
             setTouchEnabled(true)
             isDragEnabled = true
-            setScaleEnabled(true)      // Habilita o zoom nos dois eixos (X e Y)
+            setScaleEnabled(true)
             setScaleXEnabled(true)
             setScaleYEnabled(true)
-            setPinchZoom(false)        // Habilita o zoom de "pinça" para escalar eixos independentemente
+            setPinchZoom(false)
             isDoubleTapToZoomEnabled = true
 
             // --- CORREÇÃO PRINCIPAL: Configuração dos Eixos Y ---
-            axisRight.isEnabled = false // Desabilita o eixo Y da direita, pois não estamos usando
-            axisLeft.isEnabled = true   // HABILITA o eixo Y da esquerda, que contém os dados
+            axisRight.isEnabled = false
+            axisLeft.isEnabled = true
             axisLeft.textColor = Color.BLACK
             axisLeft.setDrawGridLines(true)
             axisLeft.gridColor = Color.LTGRAY
@@ -276,7 +246,6 @@ class DetailsActivity : AppCompatActivity() {
             xAxis.spaceMax = 0.1f
         }
 
-        // Define os dados e redesenha o gráfico
         chart.data = lineData
         chart.invalidate()
     }
@@ -286,27 +255,26 @@ class DetailsActivity : AppCompatActivity() {
         chart.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    // Quando o usuário TOCA no gráfico, avisa o ScrollView pai para NÃO interceptar os gestos.
+
                     view.parent.requestDisallowInterceptTouchEvent(true)
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    // Quando o usuário SOLTA o dedo, devolve o controle ao ScrollView.
+
                     view.parent.requestDisallowInterceptTouchEvent(false)
                 }
             }
-            // Retorna 'false' para que o próprio gráfico também possa processar o evento de toque.
+
             false
         }
     }
 
-    // Função para criar e estilizar um único DataSet (segmento de linha)
     private fun createStyledDataSet(entries: List<Entry>, label: String?, color: Int, showInLegend: Boolean): LineDataSet {
         val finalLabel = if (showInLegend) label else null
         return LineDataSet(entries, finalLabel).apply {
             this.color = color
             this.mode = LineDataSet.Mode.CUBIC_BEZIER
-            this.setDrawValues(false) // Não desenha os valores em cima da linha
-            this.setDrawCircles(true) // Desenha um círculo em cada ponto de dado
+            this.setDrawValues(false)
+            this.setDrawCircles(true)
             this.setCircleColor(color)
             this.circleRadius = 3f
             this.setDrawCircleHole(false)

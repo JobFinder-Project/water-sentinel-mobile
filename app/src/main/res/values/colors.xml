@@ -46,6 +46,6 @@
     <color name="gray_card">#F1F3F4</color> <!-- Cinza claro para cards secundários -->
     <color name="design_green">#34A853</color>
     <color name="item_background_color">#1A000000</color>
-    <color name="dialog_item_background_color">#30686868</color>
+    <color name="dialog_item_background_color">#30000000</color>
     <color name="darker_gray">#aaa</color>
 </resources>
