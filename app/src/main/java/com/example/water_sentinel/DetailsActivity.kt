@@ -246,6 +246,10 @@ class DetailsActivity : AppCompatActivity() {
             xAxis.spaceMax = 0.1f
         }
 
+        val mv = CustomMarkerView(this, R.layout.marker_view)
+        mv.chartView = chart
+        chart.marker = mv
+
         chart.data = lineData
         chart.invalidate()
     }

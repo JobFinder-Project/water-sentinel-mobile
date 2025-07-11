@@ -3,25 +3,21 @@ package com.example.water_sentinel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.TextView
+import com.github.mikephil.charting.charts.Chart
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import com.github.mikephil.charting.charts.Chart
+import java.util.*
 
 @SuppressLint("ViewConstructor")
-class CustomMarkerView(context: Context, layoutResource: Int, private val chart: Chart<*>) : MarkerView(context, layoutResource){
-    
+class CustomMarkerView(context: Context, layoutResource: Int) : MarkerView(context, layoutResource) {
+
     private val tvContent: TextView = findViewById(R.id.tv_marker_content)
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
-    // Este método é chamado toda vez que um novo ponto é destacado
-    @SuppressLint("DefaultLocale")
     override fun refreshContent(e: Entry?, highlight: Highlight?) {
-        // Adicionamos uma verificação para o highlight também
         if (e == null || highlight == null) {
             return
         }
@@ -29,23 +25,25 @@ class CustomMarkerView(context: Context, layoutResource: Int, private val chart:
         val timestamp = e.x.toLong()
         val valor = e.y
 
-        // --- CORREÇÃO ESTÁ AQUI ---
-        // 1. Pegamos o DataSet usando o índice que o 'highlight' nos dá.
-        //    A variável 'chart' já existe na classe MarkerView.
-        val dataSet = chart.data.getDataSetByIndex(highlight.dataSetIndex)
-
-        // 2. Com o DataSet correto em mãos, agora podemos pegar seu label.
+        val dataSet = chartView.data.getDataSetByIndex(highlight.dataSetIndex)
         val label = dataSet?.label ?: ""
-
         val hora = timeFormat.format(Date(timestamp))
 
-        // O resto da sua formatação de texto está perfeita.
-        tvContent.text = String.format("%s\nHora: %s\nValor: %.1f", label, hora, valor)
+        // Lógica para formatar o valor com a unidade correta
+        val valorFormatado = when (label) {
+            "Risco" -> String.format("%.0f%%", valor)
+            "Temperatura" -> String.format("%.1f°C", valor)
+            "Umidade" -> String.format("%.0f%%", valor)
+            "Pressão" -> String.format("%.0f hPa", valor)
+            "Precipitação" -> String.format("%.1f mm", valor)
+            else -> String.format("%.1f", valor)
+        }
+
+        tvContent.text = "Hora: ${hora}\nValor: ${valorFormatado}"
 
         super.refreshContent(e, highlight)
     }
 
-    // Define a posição do marcador (tooltip) em relação ao ponto clicado
     override fun getOffset(): MPPointF {
         return MPPointF(-(width / 2f), -height.toFloat())
     }
