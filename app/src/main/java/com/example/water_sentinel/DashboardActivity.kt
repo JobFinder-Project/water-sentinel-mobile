@@ -97,8 +97,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
     private lateinit var txtvolume: TextView
     private lateinit var txtPercentual: TextView
     private lateinit var txtStatus: TextView
-    private lateinit var lineChart: com.github.mikephil.charting.charts.LineChart
-
 
 
     private val handler = Handler(Looper.getMainLooper())
@@ -116,7 +114,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         // Captura o mapa
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        lineChart = findViewById(R.id.line_chart)
 
         solicitarPermissaoNotificacao()
         setupFirebaseListener()
@@ -153,9 +150,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         findViewById<LinearLayout>(R.id.card_flood_level).setOnClickListener {
             showHistoryDialog("card_precipitation", "Histórico de Precipitação")
         }
-
-        /*lineChart = findViewById(R.id.line_chart)
-        populateChartData()*/
 
 
         // isso abaixo verifica o status para ver se o embarcado continua mandando dados

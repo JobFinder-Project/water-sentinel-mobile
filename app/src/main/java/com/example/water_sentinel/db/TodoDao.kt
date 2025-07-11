@@ -16,6 +16,9 @@ interface TodoDao {
         /*@Query("SELECT * FROM DataHistory WHERE timestamp >= :startTime ORDER BY timestamp ASC")
         suspend fun getReadingsFrom(startTime: Long): Flow<List<DataHistory>>*/
 
+        @Query("SELECT * FROM DataHistory WHERE timestamp >= :startTime ORDER BY timestamp ASC")
+        fun getReadingsFrom(startTime: Long): Flow<List<DataHistory>>
+
         // Função para buscar o bloco inicial de dados
         @Query("SELECT * FROM DataHistory ORDER BY timestamp DESC LIMIT :limit")
         suspend fun getLatestReadings(limit: Int): List<DataHistory>

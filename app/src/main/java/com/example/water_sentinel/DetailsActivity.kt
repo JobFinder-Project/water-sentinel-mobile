@@ -18,13 +18,18 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
+import com.github.mikephil.charting.components.Legend
 import kotlinx.coroutines.launch
+import android.view.ViewGroup
+import androidx.transition.TransitionManager
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 import android.view.MotionEvent
+import android.view.View
+import android.widget.TextView
 import kotlin.collections.ArrayList
 
 class DetailsActivity : AppCompatActivity() {
@@ -39,6 +44,7 @@ class DetailsActivity : AppCompatActivity() {
 
     private val chartDataBuffer = mutableListOf<DataHistory>()
     private val MAX_CHART_ENTRIES = 100 // O tamanho da nossa "janela deslizante"
+    private var isAnimating: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,17 +60,62 @@ class DetailsActivity : AppCompatActivity() {
         chartPres = findViewById(R.id.chart_pressure)
         chartPrecip = findViewById(R.id.chart_flood_level)
 
+        setupExpandableChart(findViewById(R.id.header_risk), chartRisk)
+        setupExpandableChart(findViewById(R.id.header_temperature), chartTemp)
+        setupExpandableChart(findViewById(R.id.header_humidity), chartUmid)
+        setupExpandableChart(findViewById(R.id.header_pressure), chartPres)
+        setupExpandableChart(findViewById(R.id.header_precipitation), chartPrecip)
 
-        setupChartTouchListener(chartRisk)
-        setupChartTouchListener(chartTemp)
-        setupChartTouchListener(chartUmid)
-        setupChartTouchListener(chartPres)
-        setupChartTouchListener(chartPrecip)
+
+        setupTouchListeners()
 
         //populateAllCharts()
         observeChartData()
         //loadInitialDataAndObserve()
     }
+    private fun setupTouchListeners() {
+        setupChartTouchListener(chartRisk)
+        setupChartTouchListener(chartTemp)
+        setupChartTouchListener(chartUmid)
+        setupChartTouchListener(chartPres)
+        setupChartTouchListener(chartPrecip)
+    }
+
+    private fun setupExpandableChart(header: TextView, chart: LineChart) {
+        header.setOnClickListener {
+            // Se uma animação já estiver em progresso, ignora o clique.
+            if (isAnimating) {
+                return@setOnClickListener
+            }
+
+            // Ativa a trava para bloquear outros cliques.
+            isAnimating = true
+
+            if (chart.visibility == View.VISIBLE) {
+                // Lógica para ESCONDER o gráfico
+                header.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_expand_more, 0)
+                chart.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction {
+                        chart.visibility = View.GONE
+                        isAnimating = false // Libera a trava no final da animação
+                    }
+            } else {
+                // Lógica para MOSTRAR o gráfico
+                header.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.expand_less, 0)
+                chart.alpha = 0f
+                chart.visibility = View.VISIBLE
+                chart.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .withEndAction {
+                        isAnimating = false // Libera a trava no final da animação
+                    }
+            }
+        }
+    }
+
     private fun loadInitialDataAndObserve() {
         lifecycleScope.launch {
             // 1. Carrega os dados iniciais uma única vez
@@ -93,7 +144,7 @@ class DetailsActivity : AppCompatActivity() {
 
         chartDataBuffer.add(newReading) // Adiciona o novo no final
 
-        while (chartDataBuffer.size > MAX_CHART_ENTRIES) {
+        if (chartDataBuffer.size > MAX_CHART_ENTRIES) {
             chartDataBuffer.removeAt(0) // Remove o mais antigo do início
         }
 
@@ -113,41 +164,6 @@ class DetailsActivity : AppCompatActivity() {
         }
     }
 
-
-    /*private fun populateAllCharts() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-            val readings = todoDao.getReadingsFrom(startOfDay)
-
-            if (readings.isEmpty()) {
-                withContext(Dispatchers.Main) {
-                    // Limpa todos os gráficos se não houver dados
-                    chartRisk.clear()
-                    chartTemp.clear()
-                    chartUmid.clear()
-                    chartPres.clear()
-                    chartPrecip.clear()
-                }
-                return@launch
-            }
-
-            // Processa e exibe cada gráfico individualmente
-            val riskDataSets = createLineSegments(readings, "Risco", Color.GREEN) { it.percentage?.toFloat() }
-            val tempDataSets = createLineSegments(readings, "Temperatura", Color.RED) { it.temperature }
-            val umidDataSets = createLineSegments(readings, "Umidade", Color.BLUE) { it.humidity?.toFloat() }
-            val presDataSets = createLineSegments(readings, "Pressão", Color.MAGENTA) { it.pressure?.toFloat() }
-            val precipDataSets = createLineSegments(readings, "Precipitação", Color.CYAN) { it.precipitation }
-
-            withContext(Dispatchers.Main) {
-                displayChartData(chartRisk, riskDataSets)
-                displayChartData(chartTemp, tempDataSets)
-                displayChartData(chartUmid, umidDataSets)
-                displayChartData(chartPres, presDataSets)
-                displayChartData(chartPrecip, precipDataSets)
-            }
-        }
-    }
-*/
     private fun updateAllCharts(readings: List<DataHistory>) {
         if (readings.isEmpty()) {
             chartRisk.clear()
@@ -183,23 +199,22 @@ class DetailsActivity : AppCompatActivity() {
         color: Int,
         valueExtractor: (DataHistory) -> Float?
     ): List<LineDataSet> {
+        if (readings.isEmpty()) return emptyList()
+
         val segments = mutableListOf<LineDataSet>()
         var currentSegmentEntries = mutableListOf<Entry>()
-        var lastTimestamp = readings.firstOrNull()?.timestamp ?: return emptyList()
+        var lastTimestamp = readings.first().timestamp
+        val GAP_THRESHOLD_MINUTES = 5 * 60 * 1000
 
-        val GAP_THRESHOLD_MINUTES = 5 * 60 * 1000 // 5 minutos
-    
         for (reading in readings) {
             if (reading.timestamp - lastTimestamp > GAP_THRESHOLD_MINUTES) {
-                // Furo detectado, fecha o segmento anterior se não estiver vazio
                 if (currentSegmentEntries.isNotEmpty()) {
-                    segments.add(createStyledDataSet(currentSegmentEntries, label, color))
+                    // Ao criar o segmento, verificamos se é o primeiro.
+                    // Se for, passamos showInLegend = true. Senão, false.
+                    segments.add(createStyledDataSet(currentSegmentEntries, label, color, segments.isEmpty()))
                 }
-                // Inicia um novo segmento
                 currentSegmentEntries = mutableListOf()
             }
-
-            // Adiciona o ponto ao segmento atual
             valueExtractor(reading)?.let {
                 currentSegmentEntries.add(Entry(reading.timestamp.toFloat(), it))
             }
@@ -208,15 +223,7 @@ class DetailsActivity : AppCompatActivity() {
 
         // Adiciona o último segmento que ficou aberto
         if (currentSegmentEntries.isNotEmpty()) {
-            segments.add(createStyledDataSet(currentSegmentEntries, label, color))
-        }
-
-        // Lógica para que apenas o primeiro segmento apareça na legenda
-        segments.forEachIndexed { index, dataSet ->
-            if (index > 0) {
-                dataSet.label = null // Apaga o nome dos segmentos seguintes
-                dataSet.isHighlightEnabled = false
-            }
+            segments.add(createStyledDataSet(currentSegmentEntries, label, color, segments.isEmpty()))
         }
 
         return segments
@@ -229,7 +236,8 @@ class DetailsActivity : AppCompatActivity() {
             chart.invalidate()
             return
         }
-
+        val lineData = LineData(dataSets)
+        lineData.setDrawValues(false)
 
         // Configura a aparência geral do gráfico
         chart.apply {
@@ -269,7 +277,7 @@ class DetailsActivity : AppCompatActivity() {
         }
 
         // Define os dados e redesenha o gráfico
-        chart.data = LineData(dataSets)
+        chart.data = lineData
         chart.invalidate()
     }
 
@@ -292,8 +300,9 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     // Função para criar e estilizar um único DataSet (segmento de linha)
-    private fun createStyledDataSet(entries: List<Entry>, label: String, color: Int): LineDataSet {
-        return LineDataSet(entries, label).apply {
+    private fun createStyledDataSet(entries: List<Entry>, label: String?, color: Int, showInLegend: Boolean): LineDataSet {
+        val finalLabel = if (showInLegend) label else null
+        return LineDataSet(entries, finalLabel).apply {
             this.color = color
             this.mode = LineDataSet.Mode.CUBIC_BEZIER
             this.setDrawValues(false) // Não desenha os valores em cima da linha
@@ -302,6 +311,10 @@ class DetailsActivity : AppCompatActivity() {
             this.circleRadius = 3f
             this.setDrawCircleHole(false)
             this.lineWidth = 1.5f
+
+            if (!showInLegend) {
+                this.form = Legend.LegendForm.NONE
+            }
         }
 
     }
