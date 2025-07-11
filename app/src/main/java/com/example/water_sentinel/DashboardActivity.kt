@@ -89,6 +89,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var statusCheckRunnable: Runnable
+    private var isSystemActive: Boolean = false
     private var ultimoTimestampRecebido: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -140,14 +141,8 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
 
 
 
-        // isso abaixo verifica o status para ver se o embarcado continua mandando dados
-        statusCheckRunnable = object : Runnable {
-            override fun run() {
-                checkStatus()
-                handler.postDelayed(this, 3000) // 5000 ms = 5 segundos
-            }
-        }
-        handler.post(statusCheckRunnable)
+        // verifica o status para ver se o embarcado continua mandando dados
+        //handler.postDelayed(statusCheckRunnable, 3000) // 5000 ms = 5 segundos
     }
     override fun onDialogDismissed() {
         isDialogCurrentlyShowing = false // Destrava
@@ -158,8 +153,8 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
 
     // Função que recupera os dados do Firebase
     private fun setupFirebaseListener() {
-        setupDataListener()
         setupTimestampListener()
+        setupDataListener()
     }
 
     // Função que acessa os dados do Firebase
@@ -171,9 +166,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         refDht.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (!isSystemActive) {
-                    return
-                }
 
                 val temperatura = snapshot.child("temperatura").getValue(Float::class.java)
                 val umidade = snapshot.child("umidade").getValue(Int::class.java)
@@ -191,7 +183,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                 txtPercentual.text = percentual?.let { "$it%" } ?: "---"
 
                 val alertLevelAtual = snapshot.child("alertLevel").getValue(Int::class.java)
-                processarMudancaAlertLevel(alertLevelAtual)
 
                 val status = findViewById<TextView>(R.id.tv_weather_desc).text.toString()
                 if (isSystemActive) {
@@ -219,6 +210,8 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                     this.status = alertLevelAtual ?: -1
                 }
 
+                // atualiza o status do sistema
+                checkStatus()
                 processarMudancaAlertLevel(alertLevelAtual)
 
                 if (::map.isInitialized) {
@@ -387,6 +380,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                         val dataHora = LocalDateTime.of(data, hora)
 
                         ultimoTimestampRecebido = dataHora.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                        checkStatus()
                     } catch (e: Exception) {
                         Log.e("DateTime", "Erro ao parsear data/hora do Firebase", e)
                     }
@@ -399,23 +393,28 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         })
     }
 
-    private var isSystemActive: Boolean = false
+
 
     // função que altera o status do sistema
     private fun checkStatus() {
         val atualTimestamp = System.currentTimeMillis()
         val diferencaSeg = (atualTimestamp - ultimoTimestampRecebido) / 1000
 
-        if (ultimoTimestampRecebido == 0L || diferencaSeg > 20) {
-            if (isSystemActive) {
-                isSystemActive = false
-                txtStatus.text = "Sistema inativo"
-                clearDashboardData() // Limpa a UI
-            }
-        } else {
+        // O sistema só pode ser ativo se ambos os dados iniciais foram carregados
+        if (ultimoTimestampRecebido != 0L && diferencaSeg <= 20) {
             if (!isSystemActive) {
                 isSystemActive = true
                 txtStatus.text = "Sistema ativo"
+            }
+        } else {
+            if (isSystemActive) { // Transiciona para inativo
+                isSystemActive = false
+                txtStatus.text = "Sistema inativo"
+                clearDashboardData() // Limpa a UI
+            } else {
+                // Se carregou, mas está desatualizado
+                txtStatus.text = "Sistema inativo"
+                clearDashboardData()
             }
         }
     }
