@@ -1,20 +1,17 @@
 package com.example.water_sentinel
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -54,19 +51,9 @@ import java.time.format.DateTimeFormatter
 import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
 import com.example.water_sentinel.db.DataHistory
-import com.github.mikephil.charting.components.AxisBase
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
 import java.time.ZoneId
-import java.util.Date
-import java.util.Locale
 
 
 class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialogFragment.OnDialogDismissListener {
@@ -119,12 +106,12 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         setupFirebaseListener()
 
 
-        txtTemp = findViewById<TextView>(R.id.tv_temperature)
-        txtUmi = findViewById<TextView>(R.id.tv_humidity)
-        txtPressao = findViewById<TextView>(R.id.tv_pressure)
-        txtPreci = findViewById<TextView>(R.id.tv_flood_level)
-        txtvolume = findViewById<TextView>(R.id.tv_volume_mm)
-        txtPercentual = findViewById<TextView>(R.id.tv_flood_percent)
+        txtTemp = findViewById(R.id.tv_temperature)
+        txtUmi = findViewById(R.id.tv_humidity)
+        txtPressao = findViewById(R.id.tv_pressure)
+        txtPreci = findViewById(R.id.tv_flood_level)
+        txtvolume = findViewById(R.id.tv_volume_mm)
+        txtPercentual = findViewById(R.id.tv_flood_percent)
         txtStatus = findViewById(R.id.tv_weather_desc)
 
         // Configura clique para abrir o mapa
@@ -136,7 +123,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
 
-        // --- CONFIGURAÇÃO DOS CLIQUES NOS CARDS ---
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_flood_risk).setOnClickListener {
             showHistoryDialog("percentage", "Histórico de Risco")
         }
@@ -152,11 +138,10 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         }
 
 
-        // isso abaixo verifica o status para ver se o embarcado continua mandando dados
         statusCheckRunnable = object : Runnable {
             override fun run() {
                 checkStatus()
-                handler.postDelayed(this, 3000) // 5000 ms = 5 segundos
+                handler.postDelayed(this, 3000)
             }
         }
         handler.post(statusCheckRunnable)
@@ -274,7 +259,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         val txtStatus = findViewById<TextView>(R.id.tv_weather_desc)
 
         val nivelAlertaAtual = alertLevelFirebase ?: 0
-        //Log.d(TAG, "processarMudancaAlertLevel - nivelAlertaAtual SENDO PROCESSADO: $nivelAlertaAtual (valor original do Firebase: $alertLevelFirebase)")
 
         val textoRisco: String
         val corTextoRiscoRes: Int
@@ -568,14 +552,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
             3 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_high_risk)!!)
             else -> bitmapDescriptorFromVector(getDrawable(R.drawable.sinal_off_de_rede)!!)
         }
-
-        /*val titulo: String = when (posto.status) {
-            0 -> binding.root.context.getString(R.string.risk_0_no_risk)
-            1 -> binding.root.context.getString(R.string.risk_1_low)
-            2 -> binding.root.context.getString(R.string.risk_2_medium)
-            3 -> binding.root.context.getString(R.string.risk_3_high)
-            else -> binding.root.context.getString(R.string.risk_level_unknown)
-        }*/
 
         map.addMarker(
             MarkerOptions()

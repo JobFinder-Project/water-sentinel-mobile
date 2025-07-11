@@ -20,11 +20,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.os.Build
-import android.preference.PreferenceActivity.Header
 import android.widget.ImageButton
 import android.widget.ScrollView
 import android.util.TypedValue
-import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
 
