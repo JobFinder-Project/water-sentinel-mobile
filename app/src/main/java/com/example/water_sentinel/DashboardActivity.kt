@@ -275,15 +275,15 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
             when (nivelAlertaAtual) {
                 0 -> { // Sem Risco
                     textoRisco = getString(R.string.risk_0_no_risk)
-                    corTextoRiscoRes = R.color.risk_color_blue
+                    corTextoRiscoRes = R.color.risk_color_green
                     idIconeGota = R.drawable.sunny
-                    corIconeRes = R.color.risk_color_blue
+                    corIconeRes = R.color.risk_color_green
                 }
                 1 -> { // Baixo Risco
                     textoRisco = getString(R.string.risk_1_low)
-                    corTextoRiscoRes = R.color.risk_color_green
+                    corTextoRiscoRes = R.color.risk_color_blue
                     idIconeGota = R.drawable.gota
-                    corIconeRes = R.color.risk_color_green
+                    corIconeRes = R.color.risk_color_blue
 
                     tituloNotificacao = getString(R.string.risk_1_low)
                     mensagemNotificacao = getString(R.string.message_low_risk)
