@@ -5,5 +5,5 @@ object ChartLabels {
     const val TEMPERATURE = "Temperatura"
     const val HUMIDITY = "Umidade"
     const val PRESSURE = "Pressão"
-    const val PRECIPITATION = "Precipitação"
+    const val VOLUME = "Volume"
 }

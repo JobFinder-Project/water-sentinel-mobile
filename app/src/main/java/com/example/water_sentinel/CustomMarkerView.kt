@@ -38,7 +38,7 @@ class CustomMarkerView(context: Context, layoutResource: Int) : MarkerView(conte
             ChartLabels.TEMPERATURE -> String.format(Locale.getDefault(), "%.1f°C", valor)
             ChartLabels.HUMIDITY -> String.format(Locale.getDefault(), "%.0f%%", valor)
             ChartLabels.PRESSURE -> String.format(Locale.getDefault(), "%.0f hPa", valor)
-            ChartLabels.PRECIPITATION -> String.format(Locale.getDefault(), "%.1f mm", valor)
+            ChartLabels.VOLUME -> String.format(Locale.getDefault(), "%.1f ml", valor)
             else -> String.format(Locale.getDefault(), "%.1f", valor)
         }
 

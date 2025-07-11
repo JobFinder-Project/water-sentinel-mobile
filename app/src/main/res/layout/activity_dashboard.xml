@@ -132,22 +132,12 @@
                             android:id="@+id/tv_flood_risk_level_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="25dp"
                             android:text="@string/sem_dados"
                             android:textColor="@color/darker_gray"
                             android:textSize="20sp"
                             android:textStyle="bold"
                             app:autoSizeTextType="uniform" />
-
-                        <TextView
-                            android:id="@+id/tv_volume_mm"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/volume"
-                            android:textColor="@android:color/darker_gray"
-                            android:textSize="14sp"
-                            android:layout_marginTop="0dp"
-                            android:layout_marginBottom="12dp"
-                            app:autoSizeTextType="uniform"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -293,13 +283,13 @@
                     android:id="@+id/img_precipitation_icon"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:contentDescription="@string/precipitaco"
+                    android:contentDescription="@string/volume"
                     android:src="@drawable/rain_simples"
                     app:tint="@color/white"
                     android:layout_marginBottom="8dp"/>
 
                 <TextView
-                    android:id="@+id/tv_flood_level"
+                    android:id="@+id/tv_volume"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/sem_dados"
@@ -312,7 +302,7 @@
                     android:id="@+id/txt_precipitation_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/precipitaco"
+                    android:text="@string/volume"
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     app:autoSizeTextType="uniform"/>
