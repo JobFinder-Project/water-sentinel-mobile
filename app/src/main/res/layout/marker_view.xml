@@ -7,11 +7,21 @@
     android:padding="8dp">
 
     <TextView
+        android:id="@+id/tv_marker_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Título"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
         android:id="@+id/tv_marker_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Conteúdo"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
-        android:text="Conteúdo do Marcador" />
+        android:textSize="12sp" />
 
 </LinearLayout>

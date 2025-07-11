@@ -35,9 +35,6 @@ class DetailsActivity : AppCompatActivity() {
     private lateinit var chartPres: LineChart
     private lateinit var chartPrecip: LineChart
 
-
-    private val chartDataBuffer = mutableListOf<DataHistory>()
-    private val MAX_CHART_ENTRIES = 100
     private var isAnimating: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,11 +148,12 @@ class DetailsActivity : AppCompatActivity() {
             return
         }
 
-        val riskDataSets = createLineSegments(readings, "Risco", Color.GREEN) { it.percentage?.toFloat() }
-        val tempDataSets = createLineSegments(readings, "Temperatura", Color.RED) { it.temperature }
-        val umidDataSets = createLineSegments(readings, "Umidade", Color.BLUE) { it.humidity?.toFloat() }
-        val presDataSets = createLineSegments(readings, "Pressão", Color.MAGENTA) { it.pressure?.toFloat() }
-        val precipDataSets = createLineSegments(readings, "Precipitação", Color.CYAN) { it.precipitation }
+        val riskDataSets = createLineSegments(readings, ChartLabels.RISK, Color.GREEN) { it.percentage?.toFloat() }
+        val tempDataSets = createLineSegments(readings, ChartLabels.TEMPERATURE, Color.RED) { it.temperature }
+        val umidDataSets = createLineSegments(readings, ChartLabels.HUMIDITY, Color.BLUE) { it.humidity?.toFloat() }
+        val presDataSets = createLineSegments(readings, ChartLabels.PRESSURE, Color.MAGENTA) { it.pressure?.toFloat() }
+        val precipDataSets = createLineSegments(readings, ChartLabels.PRECIPITATION, Color.CYAN) { it.precipitation }
+
 
         lifecycleScope.launch(Dispatchers.Main) {
             displayChartData(chartRisk, riskDataSets)
@@ -169,7 +167,7 @@ class DetailsActivity : AppCompatActivity() {
 
     private fun createLineSegments(
         readings: List<DataHistory>,
-        label: String,
+        metricType: String,
         color: Int,
         valueExtractor: (DataHistory) -> Float?
     ): List<LineDataSet> {
@@ -183,19 +181,21 @@ class DetailsActivity : AppCompatActivity() {
         for (reading in readings) {
             if (reading.timestamp - lastTimestamp > GAP_THRESHOLD_MINUTES) {
                 if (currentSegmentEntries.isNotEmpty()) {
-
-                    segments.add(createStyledDataSet(currentSegmentEntries, label, color, segments.isEmpty()))
+                    val segmentLabel = if (segments.isEmpty()) metricType else null
+                    segments.add(createStyledDataSet(currentSegmentEntries, segmentLabel, color))
                 }
                 currentSegmentEntries = mutableListOf()
             }
-            valueExtractor(reading)?.let {
-                currentSegmentEntries.add(Entry(reading.timestamp.toFloat(), it))
+
+            valueExtractor(reading)?.let { value ->
+                currentSegmentEntries.add(Entry(reading.timestamp.toFloat(), value, metricType))
             }
             lastTimestamp = reading.timestamp
         }
 
         if (currentSegmentEntries.isNotEmpty()) {
-            segments.add(createStyledDataSet(currentSegmentEntries, label, color, segments.isEmpty()))
+            val segmentLabel = if (segments.isEmpty()) metricType else null
+            segments.add(createStyledDataSet(currentSegmentEntries, segmentLabel, color))
         }
 
         return segments
@@ -272,9 +272,11 @@ class DetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun createStyledDataSet(entries: List<Entry>, label: String?, color: Int, showInLegend: Boolean): LineDataSet {
-        val finalLabel = if (showInLegend) label else null
-        return LineDataSet(entries, finalLabel).apply {
+    private fun createStyledDataSet(entries: List<Entry>, label: String?, color: Int): LineDataSet {
+        return LineDataSet(entries, label).apply {
+            if (label == null) {
+                this.form = Legend.LegendForm.NONE
+            }
             this.color = color
             this.mode = LineDataSet.Mode.CUBIC_BEZIER
             this.setDrawValues(false)
@@ -284,9 +286,6 @@ class DetailsActivity : AppCompatActivity() {
             this.setDrawCircleHole(false)
             this.lineWidth = 1.5f
 
-            if (!showInLegend) {
-                this.form = Legend.LegendForm.NONE
-            }
         }
 
     }
