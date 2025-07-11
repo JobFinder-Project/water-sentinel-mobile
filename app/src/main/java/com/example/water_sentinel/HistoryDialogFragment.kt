@@ -2,6 +2,7 @@ package com.example.water_sentinel
 
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,11 +20,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.os.Build
-import android.preference.PreferenceActivity.Header
 import android.widget.ImageButton
 import android.widget.ScrollView
 import android.util.TypedValue
-import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
 
@@ -63,6 +62,20 @@ class HistoryDialogFragment : DialogFragment() {
 
         val metricType = arguments?.getString(ARG_METRIC_TYPE) ?: return
         val title = arguments?.getString(ARG_METRIC_TITLE) ?: "Histórico"
+
+        val btnSeeDetails: Button = view.findViewById(R.id.btn_see_details)
+
+        if (metricType == "percentage") {
+            btnSeeDetails.visibility = View.VISIBLE
+            btnSeeDetails.setOnClickListener {
+                val intent = Intent(requireContext(), DetailsActivity::class.java)
+                startActivity(intent)
+                dismiss()
+            }
+        } else {
+            btnSeeDetails.visibility = View.GONE
+        }
+
 
         tvTitle = view.findViewById(R.id.dialog_title)
         container = view.findViewById(R.id.ll_dialog_history_container)

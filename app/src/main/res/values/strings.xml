@@ -33,7 +33,7 @@
     <string name="baixo_risco">Baixo risco</string>
     <string name="medio_rsico">Médio risco</string>
     <string name="alto_risco">Alto risco</string>
-    
+
     <!-- Dialog -->
     <string name="title_dialog">Histórico</string>
     <string name="data">Data</string>
@@ -42,6 +42,9 @@
     <string name="descricao_dialog">Fechar</string>
     <string name="sem_dados_data">--/--/--</string>
     <string name="sem_dados_hora">--:--:--</string>
+
+    <!-- Graficos -->
+    <string name="analise">Analytics</string>
 
 
     <!-- Riscos Alert -->

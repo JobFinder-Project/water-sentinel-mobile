@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background_gradient"
     android:fillViewport="true"
     tools:context=".DashboardActivity">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background_gradient"
+        android:layout_marginTop="25dp"
         android:id="@+id/main"
         tools:context=".DashboardActivity"
         android:scrollY="@dimen/cardview_default_radius">
-
 
         <TextView
             android:id="@+id/tv_location"
@@ -319,19 +320,20 @@
         </LinearLayout>
 
 
+
+
         <!-- Estilização do mapa -->
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/map_card"
             android:layout_width="0dp"
-            android:layout_height="200dp"
+            android:layout_height="220dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ll_info_row"
             app:strokeColor="@color/card_stroke_color"
@@ -394,5 +396,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+
+</androidx.core.widget.NestedScrollView>

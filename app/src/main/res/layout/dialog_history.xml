@@ -95,4 +95,15 @@
 
     </LinearLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_see_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ver Detalhes"
+        android:background="@drawable/dialog_item_background"
+        app:backgroundTint="@null"
+        android:textColor="@color/white"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"/>
+
 </LinearLayout>
