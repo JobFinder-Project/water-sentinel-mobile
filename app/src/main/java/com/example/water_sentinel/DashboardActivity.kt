@@ -80,7 +80,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
     private lateinit var txtTemp: TextView
     private lateinit var txtUmi: TextView
     private lateinit var txtPressao: TextView
-    private lateinit var txtPreci: TextView
     private lateinit var txtvolume: TextView
     private lateinit var txtPercentual: TextView
     private lateinit var txtStatus: TextView
@@ -110,8 +109,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         txtTemp = findViewById(R.id.tv_temperature)
         txtUmi = findViewById(R.id.tv_humidity)
         txtPressao = findViewById(R.id.tv_pressure)
-        txtPreci = findViewById(R.id.tv_flood_level)
-        txtvolume = findViewById(R.id.tv_volume_mm)
+        txtvolume = findViewById(R.id.tv_volume)
         txtPercentual = findViewById(R.id.tv_flood_percent)
         txtStatus = findViewById(R.id.tv_weather_desc)
 
@@ -135,7 +133,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
             showHistoryDialog("pressure", "Histórico de Pressão")
         }
         findViewById<LinearLayout>(R.id.card_flood_level).setOnClickListener {
-            showHistoryDialog("card_precipitation", "Histórico de Precipitação")
+            showHistoryDialog("card_precipitation", "Histórico de Volume")
         }
 
 
@@ -177,8 +175,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                 txtTemp.text = temperatura?.let { "%.1f°C".format(it).replace('.', ',') } ?: "---"
                 txtUmi.text = umidade?.let { "$it%" } ?: "---"
                 txtPressao.text = pressao?.let { "$it hPa" } ?: "---"
-                txtPreci.text = volume?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "---"
-                txtvolume.text = volume?.let { String.format("%.1f mm/s", it).replace('.', ',') } ?: "---"
+                txtvolume.text = volume?.let { String.format("%.1f ml", it).replace('.', ',') } ?: "---"
                 txtPercentual.text = percentual?.let { "$it%" } ?: "---"
 
                 val alertLevelAtual = snapshot.child("alertLevel").getValue(Int::class.java)
@@ -190,7 +187,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                             temperature = temperatura,
                             humidity = umidade,
                             pressure = pressao,
-                            precipitation = volume,
                             volume = volume,
                             percentage = percentual,
                             status = status
@@ -224,7 +220,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                 txtTemp.text = getString(R.string.sem_temperatura)
                 txtUmi.text = getString(R.string.sem_dados)
                 txtPressao.text = getString(R.string.sem_dados)
-                txtPreci.text = getString(R.string.volume)
                 txtvolume.text = getString(R.string.sem_dados)
                 processarMudancaAlertLevel(null)
             }
@@ -280,15 +275,15 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
             when (nivelAlertaAtual) {
                 0 -> { // Sem Risco
                     textoRisco = getString(R.string.risk_0_no_risk)
-                    corTextoRiscoRes = R.color.risk_color_blue
+                    corTextoRiscoRes = R.color.risk_color_green
                     idIconeGota = R.drawable.sunny
-                    corIconeRes = R.color.risk_color_blue
+                    corIconeRes = R.color.risk_color_green
                 }
                 1 -> { // Baixo Risco
                     textoRisco = getString(R.string.risk_1_low)
-                    corTextoRiscoRes = R.color.risk_color_green
+                    corTextoRiscoRes = R.color.risk_color_blue
                     idIconeGota = R.drawable.gota
-                    corIconeRes = R.color.risk_color_green
+                    corIconeRes = R.color.risk_color_blue
 
                     tituloNotificacao = getString(R.string.risk_1_low)
                     mensagemNotificacao = getString(R.string.message_low_risk)
@@ -421,7 +416,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         txtTemp.text = "---"
         txtUmi.text = "---"
         txtPressao.text = "---"
-        txtPreci.text = "---"
         txtvolume.text = "---"
         txtPercentual.text = "---"
 

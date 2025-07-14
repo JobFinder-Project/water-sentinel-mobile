@@ -33,7 +33,7 @@ class DetailsActivity : AppCompatActivity() {
     private lateinit var chartTemp: LineChart
     private lateinit var chartUmid: LineChart
     private lateinit var chartPres: LineChart
-    private lateinit var chartPrecip: LineChart
+    private lateinit var chartVolum: LineChart
 
     private var isAnimating: Boolean = false
 
@@ -59,13 +59,13 @@ class DetailsActivity : AppCompatActivity() {
         chartTemp = findViewById(R.id.chart_temperature)
         chartUmid = findViewById(R.id.chart_humidity)
         chartPres = findViewById(R.id.chart_pressure)
-        chartPrecip = findViewById(R.id.chart_flood_level)
+        chartVolum = findViewById(R.id.chart_flood_level)
 
         setupExpandableChart(findViewById(R.id.header_risk), chartRisk)
         setupExpandableChart(findViewById(R.id.header_temperature), chartTemp)
         setupExpandableChart(findViewById(R.id.header_humidity), chartUmid)
         setupExpandableChart(findViewById(R.id.header_pressure), chartPres)
-        setupExpandableChart(findViewById(R.id.header_precipitation), chartPrecip)
+        setupExpandableChart(findViewById(R.id.header_volume), chartVolum)
 
 
         setupTouchListeners()
@@ -79,7 +79,7 @@ class DetailsActivity : AppCompatActivity() {
         setupChartTouchListener(chartTemp)
         setupChartTouchListener(chartUmid)
         setupChartTouchListener(chartPres)
-        setupChartTouchListener(chartPrecip)
+        setupChartTouchListener(chartVolum)
     }
 
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
@@ -144,7 +144,7 @@ class DetailsActivity : AppCompatActivity() {
             chartTemp.clear()
             chartUmid.clear()
             chartPres.clear()
-            chartPrecip.clear()
+            chartVolum.clear()
             return
         }
 
@@ -152,7 +152,7 @@ class DetailsActivity : AppCompatActivity() {
         val tempDataSets = createLineSegments(readings, ChartLabels.TEMPERATURE, Color.RED) { it.temperature }
         val umidDataSets = createLineSegments(readings, ChartLabels.HUMIDITY, Color.BLUE) { it.humidity?.toFloat() }
         val presDataSets = createLineSegments(readings, ChartLabels.PRESSURE, Color.MAGENTA) { it.pressure?.toFloat() }
-        val precipDataSets = createLineSegments(readings, ChartLabels.PRECIPITATION, Color.CYAN) { it.precipitation }
+        val precipDataSets = createLineSegments(readings, ChartLabels.VOLUME, Color.CYAN) { it.volume }
 
 
         lifecycleScope.launch(Dispatchers.Main) {
@@ -160,7 +160,7 @@ class DetailsActivity : AppCompatActivity() {
             displayChartData(chartTemp, tempDataSets)
             displayChartData(chartUmid, umidDataSets)
             displayChartData(chartPres, presDataSets)
-            displayChartData(chartPrecip, precipDataSets)
+            displayChartData(chartVolum, precipDataSets)
         }
     }
 

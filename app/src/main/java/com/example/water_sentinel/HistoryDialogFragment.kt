@@ -194,7 +194,7 @@ class HistoryDialogFragment : DialogFragment() {
                         tvData.text = when (type) {
                             "humidity" -> reading.humidity?.let { "$it%" } ?: "N/A"
                             "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
-                            "card_precipitation" -> reading.precipitation?.let { String.format("%.1f mm", it).replace('.', ',') } ?: "N/A"
+                            "card_precipitation" -> reading.volume?.let { String.format("%.1f ml", it).replace('.', ',') } ?: "N/A"
                             "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N/A"
                             "percentage" -> reading.percentage?.let { "$it%" } ?: "N/A"
                             else -> "N/A"

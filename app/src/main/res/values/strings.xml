@@ -16,11 +16,11 @@
     <string name="sem_temperatura">--°</string>
     <string name="risco_de_alagamento">Risco de Alagamento</string>
     <string name="sem_risco_alagamento">--%</string>
-    <string name="volume">--mm/h</string>
+
     <string name="umidade">Umidade</string>
     <string name="sem_dados">---</string>
     <string name="pressao">Pressão</string>
-    <string name="precipitaco">Precipitação</string>
+    <string name="volume">Volume</string>
 
     <!-- 3° tela -->
     <string name="titulo_toolbar">Mapa de Alertas</string>
