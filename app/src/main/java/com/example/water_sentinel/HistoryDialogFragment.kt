@@ -63,7 +63,7 @@ class HistoryDialogFragment : DialogFragment() {
         val metricType = arguments?.getString(ARG_METRIC_TYPE) ?: return
         val title = arguments?.getString(ARG_METRIC_TITLE) ?: "Histórico"
 
-        val btnSeeDetails: Button = view.findViewById(R.id.btn_see_details)
+        /*val btnSeeDetails: Button = view.findViewById(R.id.btn_see_details)
 
         if (metricType == "percentage") {
             btnSeeDetails.visibility = View.VISIBLE
@@ -74,7 +74,7 @@ class HistoryDialogFragment : DialogFragment() {
             }
         } else {
             btnSeeDetails.visibility = View.GONE
-        }
+        }*/
 
 
         tvTitle = view.findViewById(R.id.dialog_title)
