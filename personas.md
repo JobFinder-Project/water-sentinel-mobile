@@ -59,3 +59,67 @@ Alertas rápidos e interface clara.
 
 - c) **Quais características negativas/dispensáveis dessas tecnologias?** 
 Algumas previsões são genéricas demais, e às vezes os avisos chegam tarde demais.
+
+
+
+## Persona 2 – Néa Raimunda
+
+### Identificação
+**Nome:** Néa Raimunda  
+**Idade:** 86 anos
+
+### Quem
+- a) **Qual a profissão dela?**
+Aposentada (ex-professora do ensino fundamental).
+
+- b) **Qual o nível de escolaridade dela?**
+Ensino Superior completo.
+
+- c) **Como ela se descreve?**
+*"Sou uma mulher tranquila, gosto de cuidar das minhas plantas e dos meus pets, assistir novelas e conversar com minhas vizinhas. Moro sozinha desde que meus filhos se mudaram para outras cidades. Prezo muito pela minha independência e gosto de saber das coisas que estão acontecendo ao meu redor."*
+
+- d) **Quais os medos/preocupações/frustrações dela? Por quê?**
+*"Tenho medo de incêndios e enchente, principalmente à noite. Já tive que sair de casa às pressas uma vez por conta de uma enchente. Me preocupo por não ter alguém por perto se algo acontecer de repente. Me frustro por não ter um alerta da prefeitura ou da defesa civil municipal sobre risco de enchente."*
+
+### Contexto
+- a) **Quais tarefas da sua rotina ela realiza utilizando aplicações (web, mobile, desktop)?**
+Uso o celular para falar com a família pelo WhatsApp, vejo vídeos no YouTube, alertas e notícias no Facebook e vejo o jornal local.
+
+### Problemas
+- a) **Quais problemas ela enfrenta na sua rotina que podem ser resolvidos pela aplicação a ser projetada?**
+Dificuldade em identificar o risco de enchente com antecedência. Não sabe onde buscar informações confiáveis. Às vezes, só descobre o perigo quando já é tarde.
+
+- b) **O que a aplicação a ser projetada pode ter para ajudar ela a resolver estes problemas?**
+Alertas sonoros e visuais em caso de risco, linguagem simples, com orientações claras sobre o que fazer, e talvez mensagens automáticas que avisem os filhos ou vizinhos.
+
+### Experiências com tecnologia
+- a) **Quais partes das aplicações citadas ela gosta? Por quê?**
+Gosta quando o aplicativo tem botões grandes, ícones com desenhos e fala com ela (áudio ou leitura de texto).
+
+- b) **Quais partes dessas aplicações ela não gosta? Por quê?**
+Se frustra com textos pequenos, menus confusos e quando o celular trava.
+
+- c) **Em quais dispositivos ela utiliza essas aplicações?**
+Um celular Android de entrada, com conexão Wi-Fi e redes móveis.
+
+- d) **Como ela aprende a usar uma aplicação?**
+Aprende perguntando aos filhos ou netos quando visitam, e às vezes tenta fuçar sozinha.
+
+- e) **Ela gosta de fazer as coisas passo a passo ou prefere atalhos?**
+Prefere passo a passo, com explicação calma e simples.
+
+- f) **Ela lembra melhor das coisas vendo imagens/representações gráficas, lendo texto ou ouvindo áudio?**
+Lembra melhor com imagens e com explicações simples.
+
+- g) **No mundo virtual ela gosta de interação social e compartilhamento de acontecimentos ou prefere se manter reservada?**
+Usa só para se comunicar com família e assistir conteúdos, não gosta de compartilhar muitas coisas.
+
+### Soluções Existentes
+- a) **Existem outras tecnologias que resolvem os problemas (ou partes dos problemas) citados? Quais?**
+Grupos de WhatsApp e televisão (jornal).
+
+- b) **Quais características positivas/essenciais dessas tecnologias?**
+Informações simples, acessíveis e em português claro.
+
+- c) **Quais características negativas/dispensáveis dessas tecnologias?**
+Mensagens genéricas demais, informações que chegam tarde, e falta de acessibilidade nos aplicativos.
