@@ -14,3 +14,40 @@
 5.  O aplicativo deve atualizar automaticamente os dados dos postos de alerta a cada 1 minuto.
 
 ---
+
+#### História de Usuário 2:
+
+*Como usuário, gostaria de acessar os detalhes de um posto de alerta da minha região, para visualizar os dados atuais de temperatura, umidade, pressão e possibilidade de alagamento daquela região.*
+
+##### Critério de Aceitação: 
+
+
+
+---
+
+#### História de Usuário 3:
+
+*Como usuário, gostaria de visualizar a previsão do tempo para o dia e os próximos dias, para planejar meus deslocamentos com mais segurança. & Essencial*
+
+##### Critério de Aceitação: 
+
+
+---
+
+
+#### História de Usuário 4:
+
+*Como usuário, gostaria de receber notificações de alerta do posto de alerta mais próximo de minha residência, para que eu possa agir rapidamente em casos de risco.*
+
+##### Critério de Aceitação:
+
+
+---
+
+
+#### História de Usuário 5:
+
+*Como usuário, gostaria de ativar/desativar o recebimento de notificações baseadas na minha localização atual, para evitar alertas desnecessários.*
+
+##### Critério de Aceitação:
+
