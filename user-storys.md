@@ -34,7 +34,7 @@
 
 #### História de Usuário 3:
 
-*Como usuário, gostaria de visualizar a previsão do tempo para o dia e os próximos dias, para planejar meus deslocamentos com mais segurança. & Essencial*
+*Como usuário, gostaria de visualizar as condições climáticas em tempo real, para planejar meus deslocamentos com mais segurança e me previnir de eventuais alagamentos ou enchentes que podem me afetar.*
 
 ##### Critério de Aceitação: 
 1. O aplicativo deve exibir o nome da localidade atual (ex: Itacoatiara) deve ser exibido no topo da tela.
