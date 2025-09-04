@@ -74,3 +74,16 @@
 2. Quando desativado, o app deve deixar de enviar alertas baseados em localização atual, mas manter os baseados em localizações salvas.
 
 3. O usuário deve ser informado sobre o impacto de desativar essa funcionalidade (ex: “você pode deixar de receber alertas importantes”).
+
+
+#### História de Usuário 6:
+
+*Como usuário, gostaria de visualizar o histórico de dados das condições climáticas para analisar se houver uma melhora ou uma piora da situação local.* 
+
+##### Critério de Aceitação:
+
+1. A aplicação deve abrir uma caixa de dialogo para cada fator climático apresentado no Dashboard.
+
+2. O histórico de dados deve mostrar no máximo os últimos 15 valores de cada fator climático (Temperatura, Umidade, Pressão e Volume).
+
+3. Cada valor registrado no histórico, deve ser apresentado com data, hora e seu valor com sua unidade de medida.
