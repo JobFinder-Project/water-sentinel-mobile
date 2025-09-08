@@ -3,7 +3,7 @@
 ---
 
 #### História de Usuário 1:
- *Como usuário, gostaria de visualizar os postos de alertas da minha região por meio de um mapa interativo, para ter conhecimento dos lugares com possível risco.*
+ *Como usuário, gostaria de visualizar os postos de alerta da minha região por meio de um mapa interativo, para ter conhecimento dos lugares com possível risco.*
 
 ##### Critério de Aceitação:
 
@@ -34,7 +34,7 @@
 
 #### História de Usuário 3:
 
-*Como usuário, gostaria de visualizar as condições climáticas em tempo real, para planejar meus deslocamentos com mais segurança e me previnir de eventuais alagamentos ou enchentes que podem me afetar.*
+*Como usuário, gostaria de visualizar as condições climáticas em tempo real, para planejar meus deslocamentos com mais segurança e me prevenir de eventuais alagamentos ou enchentes que podem me afetar.*
 
 ##### Critério de Aceitação: 
 1. O aplicativo deve exibir o nome da localidade atual (ex: Itacoatiara) deve ser exibido no topo da tela.
@@ -49,7 +49,7 @@
 
 #### História de Usuário 4:
 
-*Como usuário, gostaria de escolher o posto de alerta clincado em algum deles todas as vezes que entrar no aplicativo, para que eu tenha a possibilidade de alterar a vizualização de diferentes postos ao entar no aplicativo.*
+*Como usuário, gostaria de escolher o posto de alerta clicado em algum deles todas às vezes que entrar no aplicativo, para que eu tenha a possibilidade de alterar a visualização de diferentes postos ao entrar no aplicativo.*
 
 ##### Critérios de Aceitação:
 
@@ -86,10 +86,10 @@
 
 #### História de Usuário 6:
 
-*Como usuário, gostaria de receber notificações de alerta dos postos de alerta que eu eu escolher, para que eu possa agir rapidamente em casos de risco.*
+*Como usuário, gostaria de receber notificações de alerta dos postos de alerta que eu escolher, para que eu possa agir rapidamente em casos de risco.*
 
 ##### Critério de Aceitação:
-1. Na tela de detalhes de cada posto de alerta, deve haver um botão para ativar as notificações daquele posto passar a receber notificações daquele posto específico.
+1. Na tela de detalhes de cada posto de alerta, deve haver um botão para ativar as notificações daquele posto, para passar a receber notificações daquele posto específico.
 
 2. O usuário pode receber notificações de múltiplos postos de alerta simultaneamente (ex: um perto de casa e outro perto do trabalho).
 
@@ -111,7 +111,7 @@
 
 ##### Critério de Aceitação:
 
-1. A aplicação deve abrir uma caixa de dialogo para cada fator climático apresentado no Dashboard.
+1. A aplicação deve abrir uma caixa de diálogo para cada fator climático apresentado no Dashboard.
 
 2. O histórico de dados deve mostrar no máximo os últimos 15 valores de cada fator climático (Temperatura, Umidade, Pressão e Volume).
 
