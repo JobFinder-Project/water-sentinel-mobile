@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import android.app.Application
+import com.example.water_sentinel.ui.dashboard.DashboardActivity
 
 /*class App : Application() {
 

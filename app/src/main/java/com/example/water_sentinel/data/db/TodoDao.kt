@@ -1,4 +1,4 @@
-package com.example.water_sentinel.db
+package com.example.water_sentinel.data.db
 
 import androidx.room.Dao
 import androidx.room.Insert

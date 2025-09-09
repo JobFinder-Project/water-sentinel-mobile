@@ -1,28 +1,29 @@
-package com.example.water_sentinel
+package com.example.water_sentinel.ui.history
 
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.view.WindowInsets
+import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
-import com.example.water_sentinel.db.TodoDao
+import com.example.water_sentinel.MyApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
-import android.os.Build
-import android.widget.ImageButton
-import android.widget.ScrollView
-import android.util.TypedValue
 
 class HistoryDialogFragment : DialogFragment() {
 
@@ -97,7 +98,7 @@ class HistoryDialogFragment : DialogFragment() {
         super.onStart()
 
         val window = dialog?.window ?: return
-        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         val titleTextSizeFactor = 0.05f
 
@@ -107,7 +108,7 @@ class HistoryDialogFragment : DialogFragment() {
             val screenHeight = windowMetrics.bounds.height()
 
 
-            val insets = windowMetrics.windowInsets.getInsets(android.view.WindowInsets.Type.systemBars())
+            val insets = windowMetrics.windowInsets.getInsets(WindowInsets.Type.systemBars())
             val width = windowMetrics.bounds.width() - insets.left - insets.right
 
             window.setLayout((width * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -128,7 +129,7 @@ class HistoryDialogFragment : DialogFragment() {
 
         } else {
             @Suppress("DEPRECATION")
-            val displayMetrics = android.util.DisplayMetrics()
+            val displayMetrics = DisplayMetrics()
             @Suppress("DEPRECATION")
             requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
             val width = displayMetrics.widthPixels
@@ -174,7 +175,9 @@ class HistoryDialogFragment : DialogFragment() {
             withContext(Dispatchers.Main) {
                 container.removeAllViews()
                 if (latestReadings.isEmpty()) {
-                    container.addView(TextView(requireContext()).apply { text = "Nenhum histórico disponível." })
+                    container.addView(TextView(requireContext()).apply {
+                        text = "Nenhum histórico disponível."
+                    })
                 } else {
                     val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
                     val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -194,8 +197,17 @@ class HistoryDialogFragment : DialogFragment() {
                         tvData.text = when (type) {
                             "humidity" -> reading.humidity?.let { "$it%" } ?: "N/A"
                             "pressure" -> reading.pressure?.let { "$it hPa" } ?: "N/A"
-                            "card_precipitation" -> reading.volume?.let { String.format("%.1f ml", it).replace('.', ',') } ?: "N/A"
-                            "temperature" -> reading.temperature?.let { String.format("%.1f°C", it).replace('.', ',') } ?: "N/A"
+                            "card_precipitation" -> reading.volume?.let {
+                                String.format(
+                                    "%.1f ml",
+                                    it
+                                ).replace('.', ',')
+                            } ?: "N/A"
+
+                            "temperature" -> reading.temperature?.let {
+                                String.format("%.1f°C", it).replace('.', ',')
+                            } ?: "N/A"
+
                             "percentage" -> reading.percentage?.let { "$it%" } ?: "N/A"
                             else -> "N/A"
                         }

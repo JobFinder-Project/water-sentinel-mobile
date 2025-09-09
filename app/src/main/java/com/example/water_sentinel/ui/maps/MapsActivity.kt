@@ -1,6 +1,7 @@
-package com.example.water_sentinel
+package com.example.water_sentinel.ui.maps
 
 import android.Manifest
+import android.R
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -15,13 +17,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.annotation.DrawableRes
-import androidx.core.app.ActivityCompat
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentContainerView
+import androidx.core.graphics.createBitmap
+import com.example.water_sentinel.ui.dashboard.DashboardActivity
+import com.example.water_sentinel.MyApp
+import com.example.water_sentinel.PostoAlerta
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -33,12 +36,10 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import androidx.core.graphics.createBitmap
-import com.example.water_sentinel.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
@@ -53,9 +54,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private var locationRequest = LocationRequest.create().apply {
-        interval = 5000
-        fastestInterval = 3000
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        LocationRequest.setInterval = 5000
+        LocationRequest.setFastestInterval = 3000
+        LocationRequest.setPriority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
     private var isPrimAtualizacaoLoc = true
@@ -207,9 +208,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 .strokeWidth(0f))
     }
 
-    private fun bitmapDescriptorFromVector(drawable: android.graphics.drawable.Drawable): BitmapDescriptor {
+    private fun bitmapDescriptorFromVector(drawable: Drawable): BitmapDescriptor {
         drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
-        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val bitmap =
+            createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         drawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)
@@ -329,7 +331,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             1 -> R.color.risk_color_blue
             2 -> R.color.alert_medium
             3 -> R.color.alert_high
-            else -> android.R.color.darker_gray
+            else -> R.color.darker_gray
         })
     }
 
