@@ -1,28 +1,36 @@
-package com.example.water_sentinel
+package com.example.water_sentinel.ui.dashboard
 
 import android.Manifest
+import android.R
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentContainerView
+import com.example.water_sentinel.MyApp
+import com.example.water_sentinel.NotificationHelper
+import com.example.water_sentinel.PostoAlerta
+import com.example.water_sentinel.ui.history.HistoryDialogFragment
+import com.example.water_sentinel.ui.maps.MapsActivity
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -34,27 +42,11 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.water_sentinel.db.TodoDao
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
-import com.google.firebase.database.getValue
+import com.google.android.material.card.MaterialCardView
 import com.google.firebase.Firebase
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import android.widget.LinearLayout
-import androidx.lifecycle.lifecycleScope
-import com.example.water_sentinel.db.DataHistory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.time.ZoneId
-
+import com.google.firebase.database.database
 
 class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialogFragment.OnDialogDismissListener {
     companion object {
@@ -70,9 +62,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
     private val database = Firebase.database
     private var lastNotifiedAlertLevel: Int = -1
     private var locationRequest = LocationRequest.create().apply {
-        interval = 5000
-        fastestInterval = 3000
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        LocationRequest.setInterval = 5000
+        LocationRequest.setFastestInterval = 3000
+        LocationRequest.setPriority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
     private lateinit var todoDao: TodoDao
@@ -122,7 +114,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
 
-        findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_flood_risk).setOnClickListener {
+        findViewById<MaterialCardView>(R.id.card_flood_risk).setOnClickListener {
             showHistoryDialog("percentage", "Histórico de Risco")
         }
 
@@ -148,83 +140,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
 
     // ------------ DADOS -----------
 
-    // Função que recupera os dados do Firebase
-    private fun setupFirebaseListener() {
-        setupTimestampListener()
-        setupDataListener()
-    }
 
-    // Função que acessa os dados do Firebase
-    private fun setupDataListener() {
-
-        // Declara o caminho dos dados do sensor DHT
-        val refDht = database.getReference("sensor/data/")
-
-        refDht.addValueEventListener(object : ValueEventListener {
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-
-                val temperatura = snapshot.child("temperatura").getValue(Float::class.java)
-                val umidade = snapshot.child("umidade").getValue(Int::class.java)
-                val pressaoRaw = snapshot.child("pressao").getValue(Int::class.java)
-                val volume = snapshot.child("volume").getValue(Float::class.java)
-                val percentual = snapshot.child("percentual").getValue(Int::class.java)
-
-                val pressao: Int? = if (pressaoRaw == 0 || pressaoRaw == null) null else pressaoRaw
-
-                txtTemp.text = temperatura?.let { "%.1f°C".format(it).replace('.', ',') } ?: "---"
-                txtUmi.text = umidade?.let { "$it%" } ?: "---"
-                txtPressao.text = pressao?.let { "$it hPa" } ?: "---"
-                txtvolume.text = volume?.let { String.format("%.1f ml", it).replace('.', ',') } ?: "---"
-                txtPercentual.text = percentual?.let { "$it%" } ?: "---"
-
-                val alertLevelAtual = snapshot.child("alertLevel").getValue(Int::class.java)
-
-                val status = findViewById<TextView>(R.id.tv_weather_desc).text.toString()
-                if (isSystemActive) {
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        val currentReading = DataHistory(
-                            temperature = temperatura,
-                            humidity = umidade,
-                            pressure = pressao,
-                            volume = volume,
-                            percentage = percentual,
-                            status = status
-                        )
-                        todoDao.insert(currentReading)
-
-                    }
-                }
-
-                val app = (application as MyApp)
-                app.postoAlerta.apply {
-                    this.temperatura = temperatura ?: 0f
-                    this.umidade = umidade ?: 0
-                    this.pressao = pressao ?: 0
-                    this.riscoPorcentagem = percentual ?: 0
-                    this.status = alertLevelAtual ?: -1
-                }
-
-                // atualiza o status do sistema
-                checkStatus()
-                processarMudancaAlertLevel(alertLevelAtual)
-
-                if (::map.isInitialized) {
-                    map.clear()
-                    addRiskMarker(app.postoAlerta)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Erro ao ler dados", error.toException())
-                txtTemp.text = getString(R.string.sem_temperatura)
-                txtUmi.text = getString(R.string.sem_dados)
-                txtPressao.text = getString(R.string.sem_dados)
-                txtvolume.text = getString(R.string.sem_dados)
-                processarMudancaAlertLevel(null)
-            }
-        })
-    }
 
 
     private fun showHistoryDialog(metricType: String, title: String) {
@@ -236,7 +152,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         isDialogCurrentlyShowing = true
         Log.d(TAG, "Abrindo diálogo para '$title'. Trava ativada.")
 
-        val dialog = HistoryDialogFragment.newInstance(metricType, title)
+        val dialog = HistoryDialogFragment.Companion.newInstance(metricType, title)
         dialog.show(supportFragmentManager, "HistoryDialog")
     }
 
@@ -261,9 +177,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
 
         if(!isSystemActive) {
             textoRisco = getString(R.string.risk_level_unknown)
-            corTextoRiscoRes = android.R.color.darker_gray
+            corTextoRiscoRes = R.color.darker_gray
             idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
-            corIconeRes = android.R.color.darker_gray
+            corIconeRes = R.color.darker_gray
             (application as MyApp).postoAlerta.apply {
                 this.riscoPorcentagem = 0
                 this.umidade = 0
@@ -311,9 +227,9 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                 }
                 else -> {
                     textoRisco = getString(R.string.risk_level_unknown)
-                    corTextoRiscoRes = android.R.color.darker_gray
+                    corTextoRiscoRes = R.color.darker_gray
                     idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
-                    corIconeRes = android.R.color.darker_gray
+                    corIconeRes = R.color.darker_gray
                 }
             }
         }
@@ -357,34 +273,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         }
     }
 
-    // Função para alterar satus do sistema
-    private fun setupTimestampListener() {
-        val refTimestamp = database.getReference("timestamp/")
 
-        refTimestamp.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val horaStr = snapshot.child("hora").getValue<String>()
-                val dataStr = snapshot.child("data").getValue<String>()
-
-                if (dataStr != null && horaStr != null) {
-                    try {
-                        val data = LocalDate.parse(dataStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                        val hora = LocalTime.parse(horaStr, DateTimeFormatter.ofPattern("HH:mm:ss"))
-                        val dataHora = LocalDateTime.of(data, hora)
-
-                        ultimoTimestampRecebido = dataHora.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                        checkStatus()
-                    } catch (e: Exception) {
-                        Log.e("DateTime", "Erro ao parsear data/hora do Firebase", e)
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Erro ao ler timestamp", error.toException())
-            }
-        })
-    }
 
 
 
@@ -557,9 +446,10 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         }
     }
 
-    private fun bitmapDescriptorFromVector(drawable: android.graphics.drawable.Drawable): BitmapDescriptor {
+    private fun bitmapDescriptorFromVector(drawable: Drawable): BitmapDescriptor {
         drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
-        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val bitmap =
+            createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         drawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)

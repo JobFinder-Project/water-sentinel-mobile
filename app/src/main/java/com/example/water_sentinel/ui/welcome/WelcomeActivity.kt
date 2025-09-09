@@ -1,14 +1,11 @@
-package com.example.water_sentinel
+package com.example.water_sentinel.ui.welcome
 
-import android.os.Bundle
-import android.widget.Button
 import android.content.Intent
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-//import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-// androidx.core.view.ViewCompat
-//import androidx.core.view.WindowInsetsCompat
+import com.example.water_sentinel.ui.dashboard.DashboardActivity
 
 class WelcomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
