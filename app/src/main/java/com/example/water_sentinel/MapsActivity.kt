@@ -1,14 +1,19 @@
 package com.example.water_sentinel
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.DrawableRes
@@ -32,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import androidx.core.graphics.createBitmap
 import com.example.water_sentinel.databinding.ActivityMapsBinding
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
@@ -51,6 +57,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         fastestInterval = 3000
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
+
+    private var isPrimAtualizacaoLoc = true
+    private var radius = 50.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,16 +93,57 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupBottomSheet() {
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN
+            isHideable = true
 
-        // Configuração opcional do comportamento
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) { }
+            // Overlay transparente
+            val overlayView = View(this@MapsActivity).apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
 
-            override fun onSlide(bottomSheet: View, slideOffset: Float) { }
-        })
+                setOnTouchListener { v, event ->
+                    // Verifica se o clique foi fora do BottomSheet
+                    val bottomSheetRect = Rect()
+                    binding.bottomSheet.getGlobalVisibleRect(bottomSheetRect)
+
+                    if (!bottomSheetRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                        // Clique fora do BottomSheet → fecha
+                        state = BottomSheetBehavior.STATE_HIDDEN
+                        true
+                    } else {
+                        // Clique dentro do BottomSheet → não faz nada
+                        false
+                    }
+                }
+            }
+
+            addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED,
+                        BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                            (binding.root as? ViewGroup)?.addView(overlayView)
+                        }
+                        BottomSheetBehavior.STATE_HIDDEN,
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            (binding.root as? ViewGroup)?.removeView(overlayView)
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    overlayView.alpha = slideOffset.coerceAtLeast(0f)
+                }
+            })
+        }
+
+        // Remove qualquer listener desnecessário do BottomSheet
+        binding.bottomSheet.setOnClickListener(null)
     }
 
     // ------------ MAPA -----------
@@ -118,6 +168,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     }
 
     private fun addRiskMarker(posto: PostoAlerta) {
+        val latitudeCentral = 10.0 / 111000
+        val latLngCentral = LatLng(posto.latLng.latitude + latitudeCentral, posto.latLng.longitude)
         //val statusRisco = findViewById<TextView>(R.id.tv_flood_risk_level_text).text.toString()
 
         val icone: BitmapDescriptor = when (posto.status) {
@@ -128,13 +180,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             else -> bitmapDescriptorFromVector(binding.root.context.getDrawable(R.drawable.sinal_off_de_rede)!!)
         }
 
-        /*val titulo: String = when (posto.status) {
-            0 -> binding.root.context.getString(R.string.risk_0_no_risk)
-            1 -> binding.root.context.getString(R.string.risk_1_low)
-            2 -> binding.root.context.getString(R.string.risk_2_medium)
-            3 -> binding.root.context.getString(R.string.risk_3_high)
-            else -> binding.root.context.getString(R.string.risk_level_unknown)
-        }*/
+        val cor = when (posto.status) {
+            0 -> binding.root.context.getColor(R.color.no_alert_transparent)
+            1 -> binding.root.context.getColor(R.color.alert_low_transparent)
+            2 -> binding.root.context.getColor(R.color.alert_medium_transparent)
+            3 -> binding.root.context.getColor(R.color.alert_high_transparent)
+            else -> binding.root.context.getColor(R.color.unknow_alert_transparent)
+        }
 
         map.addMarker(
             MarkerOptions()
@@ -145,6 +197,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             marker.tag = posto
             Log.d("MARKER_DEBUG", "Tag value: ${marker.tag}")
         }
+
+        map.addCircle(
+            CircleOptions()
+                .center(latLngCentral)
+                .radius(radius)
+                .fillColor(cor)
+                .strokeColor(Color.TRANSPARENT)
+                .strokeWidth(0f))
     }
 
     private fun bitmapDescriptorFromVector(drawable: android.graphics.drawable.Drawable): BitmapDescriptor {
@@ -173,10 +233,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         binding.tvPostoNome.text = posto.nome
         binding.tvPostoStatus.text = "Status: ${getStatusText(posto.status)}"
         binding.tvPostoStatus.setTextColor(getStatusColor(posto.status))
-        binding.tvRiscoPorcentagem.text = "Risco: ${posto.riscoPorcentagem}"
-        binding.tvUmidade.text = "Umidade: ${posto.umidade}"
-        binding.tvTemperatura.text = "Temperatura: ${posto.temperatura}"
-        binding.tvPressao.text = "Pressão: ${posto.pressao}"
+        binding.tvRiscoPorcentagem.text = "Risco: ${posto.riscoPorcentagem}%"
+        binding.tvUmidade.text = "Umidade: ${posto.umidade}%"
+        binding.tvTemperatura.text = "Temperatura: ${posto.temperatura}°C"
+        binding.tvPressao.text = "Pressão: ${posto.pressao}hPa"
 
         // Localizaçãao
         binding.tvEndereco.text = "${posto.endereco.rua}, ${posto.endereco.bairro}, ${"${posto.endereco.cidade}/${posto.endereco.estado}"}"
@@ -225,10 +285,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         // A cada atualização da localização, o mapa também é atualizado
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(lr: LocationResult) {
-                lr.lastLocation?.let { location ->
-                    val latLng = LatLng(location.latitude, location.longitude)
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                if (isPrimAtualizacaoLoc) {
+                    // Centraliza apenas na primeira atualização
+                    lr.lastLocation?.let { location ->
+                        val latLng = LatLng(location.latitude, location.longitude)
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                    }
                 }
+                isPrimAtualizacaoLoc = false
             }
         }
 

@@ -16,11 +16,11 @@
     <string name="sem_temperatura">--°</string>
     <string name="risco_de_alagamento">Risco de Alagamento</string>
     <string name="sem_risco_alagamento">--%</string>
-    <string name="volume">--mm/h</string>
+
     <string name="umidade">Umidade</string>
     <string name="sem_dados">---</string>
     <string name="pressao">Pressão</string>
-    <string name="precipitaco">Precipitação</string>
+    <string name="volume">Volume</string>
 
     <!-- 3° tela -->
     <string name="titulo_toolbar">Mapa de Alertas</string>
@@ -28,6 +28,23 @@
 
     <string name="porcentagem">--%</string>
     <string name="baixo">Baixo Risco</string>
+    <string name="legenda">Informações de Status</string>
+    <string name="sem_risco">Sem risco</string>
+    <string name="baixo_risco">Baixo risco</string>
+    <string name="medio_rsico">Médio risco</string>
+    <string name="alto_risco">Alto risco</string>
+
+    <!-- Dialog -->
+    <string name="title_dialog">Histórico</string>
+    <string name="data">Data</string>
+    <string name="hora">Hora</string>
+    <string name="dados">Dados</string>
+    <string name="descricao_dialog">Fechar</string>
+    <string name="sem_dados_data">--/--/--</string>
+    <string name="sem_dados_hora">--:--:--</string>
+
+    <!-- Graficos -->
+    <string name="analise">Analytics</string>
 
 
     <!-- Riscos Alert -->

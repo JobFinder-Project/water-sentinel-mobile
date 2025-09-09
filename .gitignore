@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+secrets.properties
+
+.gradle/
+build/
+captures/
+.DS_Store

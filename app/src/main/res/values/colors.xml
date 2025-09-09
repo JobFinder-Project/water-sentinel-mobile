@@ -30,6 +30,12 @@
     <color name="risk_color_red">#F44336</color>
     <color name="text_color_on_yellow">#000000</color>
 
+    <color name="no_alert_transparent">#1F38E738</color>
+    <color name="alert_low_transparent">#232196F3</color>
+    <color name="alert_medium_transparent">#26FFD600</color>
+    <color name="alert_high_transparent">#2AF44336</color>
+    <color name="unknow_alert_transparent">#23000000</color>
+
     <!-- Mapa - Dashboard -->
     <color name="map_background">#1A3657</color>
     <color name="card_stroke_color">#33000000</color>
@@ -40,4 +46,6 @@
     <color name="gray_card">#F1F3F4</color> <!-- Cinza claro para cards secundários -->
     <color name="design_green">#34A853</color>
     <color name="item_background_color">#1A000000</color>
+    <color name="dialog_item_background_color">#30000000</color>
+    <color name="darker_gray">#aaa</color>
 </resources>

@@ -13,13 +13,13 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import android.app.Application
 
-class App : Application() {
+/*class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
         NotificationHelper.createNotificationChannel(applicationContext)
     }
-}
+}*/
 
 object NotificationHelper {
 
@@ -89,17 +89,5 @@ object NotificationHelper {
                 // Este catch é uma segurança extra, a checagem de permissão acima deveria prevenir isso.
             }
         }
-    }
-
-    fun simulateLowRisk(context: Context) {
-        sendFloodRiskNotification(context, "Baixo Risco", "Sem chuva, sem preocupações!")
-    }
-
-    fun simulateMediumRisk(context: Context) {
-        sendFloodRiskNotification(context, "Médio Risco", "Atenção! Nível de água subindo. Prepare-se.")
-    }
-
-    fun simulateHighRisk(context: Context) {
-        sendFloodRiskNotification(context, "Alto Risco ", "PERIGO! Risco iminente de enchente. Procure um local seguro!")
     }
 }
