@@ -37,16 +37,16 @@
             android:value="${MAPS_API_KEY}" />
 
         <activity
-            android:name=".DashboardActivity"
+            android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
         <activity
-            android:name=".WelcomeActivity"
+            android:name=".ui.welcome.WelcomeActivity"
             android:exported="false" />
         <activity
-            android:name=".MapsActivity"
+            android:name=".ui.maps.MapsActivity"
             android:exported="true" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.splash.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
