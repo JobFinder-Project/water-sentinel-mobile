@@ -1,41 +1,42 @@
 package com.example.water_sentinel.ui.dashboard
 
 import android.Manifest
-import android.R
-import android.app.AlertDialog
+import com.example.water_sentinel.R
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.widget.ImageViewCompat
-import androidx.fragment.app.FragmentContainerView
+import androidx.lifecycle.lifecycleScope
 import com.example.water_sentinel.MyApp
-import com.example.water_sentinel.NotificationHelper
-import com.example.water_sentinel.PostoAlerta
+import com.example.water_sentinel.data.remote.FirebaseDataSource
+import com.example.water_sentinel.data.repository.DataRepository
+import com.example.water_sentinel.databinding.ActivityDashboardBinding
+import com.example.water_sentinel.domain.model.PostoAlerta
 import com.example.water_sentinel.ui.history.HistoryDialogFragment
 import com.example.water_sentinel.ui.maps.MapsActivity
+import com.example.water_sentinel.util.AppUtils
+import com.example.water_sentinel.util.PermissionHelper
+import com.example.water_sentinel.util.PermissionHelper.CODIGO_PERMISSAO_LOCALIZACAO
+import com.example.water_sentinel.util.PermissionHelper.CODIGO_PERMISSAO_NOTIFICACAO
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -44,104 +45,154 @@ import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.card.MaterialCardView
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
+import kotlinx.coroutines.launch
 
 class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialogFragment.OnDialogDismissListener {
     companion object {
-        private const val CODIGO_PERMISSAO_NOTIFICACAO = 1001
-        private const val CODIGO_PERMISSAO_LOCALIZACAO = 1002
         private const val TAG = "DashboardActivity" // Tag para logs
         private const val DIALOG_TAG = "HistoryDialog"
     }
-    private var isDialogCurrentlyShowing = false
-    private lateinit var map: GoogleMap
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
-    private val database = Firebase.database
-    private var lastNotifiedAlertLevel: Int = -1
-    private var locationRequest = LocationRequest.create().apply {
-        LocationRequest.setInterval = 5000
-        LocationRequest.setFastestInterval = 3000
-        LocationRequest.setPriority = LocationRequest.PRIORITY_HIGH_ACCURACY
+    private lateinit var binding: ActivityDashboardBinding
+
+    private val viewModel: DashboardViewModel by viewModels {
+        DashboardViewModelFactory(
+            DataRepository(
+                FirebaseDataSource(Firebase.database),
+                (application as MyApp).database.todoDao()
+            )
+        )
     }
 
-    private lateinit var todoDao: TodoDao
-
-    private lateinit var txtTemp: TextView
-    private lateinit var txtUmi: TextView
-    private lateinit var txtPressao: TextView
-    private lateinit var txtvolume: TextView
-    private lateinit var txtPercentual: TextView
-    private lateinit var txtStatus: TextView
-
-
-    private val handler = Handler(Looper.getMainLooper())
-    private lateinit var statusCheckRunnable: Runnable
-    private var isSystemActive: Boolean = false
-    private var ultimoTimestampRecebido: Long = 0L
+    private var isDialogCurrentlyShowing = false
+    private var isPrimAtualizacaoLoc = true
+    private lateinit var map: GoogleMap
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var locationCallback: LocationCallback? = null
+    private val locationRequest: LocationRequest by lazy {
+        LocationRequest.Builder(5000L)
+            .setMinUpdateIntervalMillis(3000L)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_dashboard)
-        Log.d(TAG, "onCreate: Activity Criada")
 
-        todoDao = (application as MyApp).database.todoDao()
+        // Infla a interface e configura o conteúdo
+        binding = ActivityDashboardBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Captura o mapa
+        // Solicita as permissões necessárias
+        PermissionHelper.solicitarPermissaoNotif(this)
+        PermissionHelper.solicitarPermissaoLoc(this)
+
+        // Configura os listeners e o observador do ViewModel
+        setupClickListeners()
+        observeViewModelState()
+
+        // Inicializa o cliente de localização e o mapa
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        solicitarPermissaoNotificacao()
-        setupFirebaseListener()
+    }
 
-
-        txtTemp = findViewById(R.id.tv_temperature)
-        txtUmi = findViewById(R.id.tv_humidity)
-        txtPressao = findViewById(R.id.tv_pressure)
-        txtvolume = findViewById(R.id.tv_volume)
-        txtPercentual = findViewById(R.id.tv_flood_percent)
-        txtStatus = findViewById(R.id.tv_weather_desc)
-
+    private fun setupClickListeners() {
         // Configura clique para abrir o mapa
-        findViewById<FragmentContainerView>(R.id.mapView).setOnClickListener {
+        binding.mapView.setOnClickListener {
             startActivity(Intent(this, MapsActivity::class.java))
         }
 
-        // Recupera a localização do usuário nesta activity
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-
-        findViewById<MaterialCardView>(R.id.card_flood_risk).setOnClickListener {
+        // Configura cliques dos históricos
+        binding.cardFloodRisk.setOnClickListener {
             showHistoryDialog("percentage", "Histórico de Risco")
         }
 
-        findViewById<LinearLayout>(R.id.card_humidity).setOnClickListener {
-            showHistoryDialog("humidity", "Histórico de Umidade")
+        binding.cardHumidity.setOnClickListener {
+            showHistoryDialog("percentage", "Histórico de Umidade")
         }
-        findViewById<LinearLayout>(R.id.card_pressure).setOnClickListener {
+
+        binding.cardPressure.setOnClickListener {
             showHistoryDialog("pressure", "Histórico de Pressão")
         }
-        findViewById<LinearLayout>(R.id.card_flood_level).setOnClickListener {
+
+        binding.cardFloodLevel.setOnClickListener {
             showHistoryDialog("card_precipitation", "Histórico de Volume")
         }
-
-
-
-        // verifica o status para ver se o embarcado continua mandando dados
-        //handler.postDelayed(statusCheckRunnable, 3000) // 5000 ms = 5 segundos
     }
+
+    private fun observeViewModelState() {
+        lifecycleScope.launch {
+            // Observa o estado da UI e atualiza a tela
+            viewModel.uiState.collect { uiState ->
+                val posto = uiState.principalPosto
+                val riscoData = uiState.cardRiscoData
+
+                // Atualiza a interface com os dados do posto principal
+                if (posto != null) {
+                    // Lógica para mostrar o status do sistema (ativo/inativo)
+                    if (posto.ativo) {
+                        binding.tvWeatherDesc.text = AppUtils.getStatusSistemaText(this@DashboardActivity, posto.ativo)
+                        binding.tvTemperature.text = getString(R.string.temperatura_com_valor, posto.temperatura)
+                        binding.tvHumidity.text = getString(R.string.umidade_com_valor, posto.umidade)
+                        binding.tvPressure.text = getString(R.string.pressao_com_valor, posto.pressao)
+                        binding.tvVolume.text = getString(R.string.volume_com_valor, posto.volume)
+                        binding.tvFloodPercent.text = getString(R.string.risco_com_valor, posto.riscoPorcentagem)
+
+                        // Estilização do card de risco
+                        val corTexto = ContextCompat.getColor(
+                            this@DashboardActivity,
+                            riscoData.corTextoRiscoRes
+                        )
+                        binding.tvFloodRiskLevelText.text = getString(riscoData.textoRisco)
+                        binding.tvFloodRiskLevelText.setTextColor(corTexto)
+                        binding.tvFloodPercent.setTextColor(corTexto)
+                        binding.imgFloodIcon.setImageResource(riscoData.idIconeGota)
+
+                        // Lógica para o tint da imagem
+                        if (riscoData.idIconeGota == R.drawable.sunny) {
+                            ImageViewCompat.setImageTintList(binding.imgFloodIcon, null)
+                        } else {
+                            val corIcone = ContextCompat.getColor(
+                                this@DashboardActivity,
+                                riscoData.corIconeRes
+                            )
+                            ImageViewCompat.setImageTintList(
+                                binding.imgFloodIcon,
+                                ColorStateList.valueOf(corIcone)
+                            )
+                        }
+
+                        // Atualiza o mapa com o marcador
+                        if (::map.isInitialized) {
+                            map.clear()
+                            addRiskMarker(posto)
+                        }
+                    } else {
+                        binding.tvWeatherDesc.text = AppUtils.getStatusSistemaText(this@DashboardActivity, posto.ativo)
+                        clearDashboardData()
+                    }
+                } else { // Limpa os dados caso não venha mais do firebase
+                    clearDashboardData()
+                }
+            }
+        }
+    }
+
+    private fun clearDashboardData() {
+        binding.tvTemperature.text = "---"
+        binding.tvHumidity.text = "---"
+        binding.tvPressure.text = "---"
+        binding.tvVolume.text = "---"
+        binding.tvFloodPercent.text = "---"
+    }
+
+    // ------------ DIALOG DE HISTÓRICO -----------
     override fun onDialogDismissed() {
         isDialogCurrentlyShowing = false // Destrava
-        Log.d(TAG, "Dialog fechado. Trava liberada.")
     }
-
-    // ------------ DADOS -----------
-
-
-
 
     private fun showHistoryDialog(metricType: String, title: String) {
         if (isDialogCurrentlyShowing) {
@@ -156,162 +207,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         dialog.show(supportFragmentManager, "HistoryDialog")
     }
 
-
-    private fun processarMudancaAlertLevel(alertLevelFirebase: Int?) {
-        // Obtém as referências para os elementos do card de risco AQUI
-        val tvLocalRiskLevelText = findViewById<TextView>(R.id.tv_flood_risk_level_text)
-        val imgLocalRiskIcon = findViewById<ImageView>(R.id.img_flood_icon)
-        val tvLocalFloodPercent = findViewById<TextView>(R.id.tv_flood_percent)
-        val txtStatus = findViewById<TextView>(R.id.tv_weather_desc)
-
-        val nivelAlertaAtual = alertLevelFirebase ?: 0
-
-        val textoRisco: String
-        val corTextoRiscoRes: Int
-        val idIconeGota: Int
-        val corIconeRes: Int
-
-        var tituloNotificacao = ""
-        var mensagemNotificacao = ""
-        var deveEnviarNotificacao = false
-
-        if(!isSystemActive) {
-            textoRisco = getString(R.string.risk_level_unknown)
-            corTextoRiscoRes = R.color.darker_gray
-            idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
-            corIconeRes = R.color.darker_gray
-            (application as MyApp).postoAlerta.apply {
-                this.riscoPorcentagem = 0
-                this.umidade = 0
-                this.temperatura = 0f
-                this.pressao = 0
-                this.status = -1
-            }
-        } else {
-            when (nivelAlertaAtual) {
-                0 -> { // Sem Risco
-                    textoRisco = getString(R.string.risk_0_no_risk)
-                    corTextoRiscoRes = R.color.risk_color_green
-                    idIconeGota = R.drawable.sunny
-                    corIconeRes = R.color.risk_color_green
-                }
-                1 -> { // Baixo Risco
-                    textoRisco = getString(R.string.risk_1_low)
-                    corTextoRiscoRes = R.color.risk_color_blue
-                    idIconeGota = R.drawable.gota
-                    corIconeRes = R.color.risk_color_blue
-
-                    tituloNotificacao = getString(R.string.risk_1_low)
-                    mensagemNotificacao = getString(R.string.message_low_risk)
-                    deveEnviarNotificacao = true
-                }
-                2 -> { // Médio Risco
-                    textoRisco = getString(R.string.risk_2_medium)
-                    corTextoRiscoRes = R.color.risk_color_yellow
-                    idIconeGota = R.drawable.gota
-                    corIconeRes = R.color.risk_color_yellow
-
-                    tituloNotificacao = getString(R.string.risk_2_medium)
-                    mensagemNotificacao = getString(R.string.message_medium_risk)
-                    deveEnviarNotificacao = true
-                }
-                3 -> { // Alto Risco
-                    textoRisco = getString(R.string.risk_3_high)
-                    corTextoRiscoRes = R.color.risk_color_red
-                    idIconeGota = R.drawable.gota
-                    corIconeRes = R.color.risk_color_red
-
-                    tituloNotificacao = getString(R.string.risk_3_high)
-                    mensagemNotificacao = getString(R.string.message_high_risk)
-                    deveEnviarNotificacao = true
-                }
-                else -> {
-                    textoRisco = getString(R.string.risk_level_unknown)
-                    corTextoRiscoRes = R.color.darker_gray
-                    idIconeGota = R.drawable.sinal_off_de_rede // trocar por outra coisa
-                    corIconeRes = R.color.darker_gray
-                }
-            }
-        }
-
-        // Converte o recurso de cor para a cor real uma vez
-        val corResolvedaParaTexto = ContextCompat.getColor(this, corTextoRiscoRes)
-        val corResolvedaParaIcone = ContextCompat.getColor(this, corIconeRes)
-
-
-        // atualiza a UI do card de risco
-        tvLocalRiskLevelText.text = textoRisco
-        tvLocalRiskLevelText.setTextColor(corResolvedaParaTexto)
-
-        imgLocalRiskIcon.setImageResource(idIconeGota)
-        if (idIconeGota == R.drawable.sunny) {
-            ImageViewCompat.setImageTintList(imgLocalRiskIcon, null)
-        } else {
-
-            val corResolvedaParaIconeTint = ContextCompat.getColor(this, corIconeRes)
-            ImageViewCompat.setImageTintList(imgLocalRiskIcon, ColorStateList.valueOf(corResolvedaParaIconeTint))
-        }
-
-        tvLocalFloodPercent.setTextColor(corResolvedaParaTexto) // Usa a mesma cor do texto de risco
-
-        // envia notificação se necessário e permitido
-        if (deveEnviarNotificacao) { // verifica se uma notificação é justificada pelo nível de alerta
-            if (checarPermissaoNotificacao()) {
-                if (nivelAlertaAtual != lastNotifiedAlertLevel) {
-                    NotificationHelper.sendFloodRiskNotification(this, tituloNotificacao, mensagemNotificacao)
-                    lastNotifiedAlertLevel = nivelAlertaAtual
-                    Log.d(TAG, "Notificação enviada para alertLevel: $nivelAlertaAtual")
-                }
-            } else { // deveEnviarNotificacao era true, mas não há permissão
-                Log.w(TAG, "Permissão de notificação não concedida para $tituloNotificacao.")
-            }
-        }
-
-        if (nivelAlertaAtual == 0 && lastNotifiedAlertLevel != 0) {
-            lastNotifiedAlertLevel = 0
-            //Log.d(TAG, "Nível de risco zerado. lastNotifiedAlertLevel resetado.")
-        }
-    }
-
-
-
-
-
-    // função que altera o status do sistema
-    private fun checkStatus() {
-        val atualTimestamp = System.currentTimeMillis()
-        val diferencaSeg = (atualTimestamp - ultimoTimestampRecebido) / 1000
-
-        // O sistema só pode ser ativo se ambos os dados iniciais foram carregados
-        if (ultimoTimestampRecebido != 0L && diferencaSeg <= 20) {
-            if (!isSystemActive) {
-                isSystemActive = true
-                txtStatus.text = "Sistema ativo"
-            }
-        } else {
-            if (isSystemActive) { // Transiciona para inativo
-                isSystemActive = false
-                txtStatus.text = "Sistema inativo"
-                clearDashboardData() // Limpa a UI
-            } else {
-                // Se carregou, mas está desatualizado
-                txtStatus.text = "Sistema inativo"
-                clearDashboardData()
-            }
-        }
-    }
-
-    private fun clearDashboardData() { //limpa os dados caso não venha mais do firebase
-        txtTemp.text = "---"
-        txtUmi.text = "---"
-        txtPressao.text = "---"
-        txtvolume.text = "---"
-        txtPercentual.text = "---"
-
-        processarMudancaAlertLevel(null)
-    }
-
-    // ------------ NOTIFICAÇÕES -----------
+    // ------------ PERMISSÕES -----------
 
     // Função para tratar a resposta da solicitação de permissao
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -321,95 +217,56 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
 
         when (requestCode) {
             CODIGO_PERMISSAO_NOTIFICACAO -> {
-                // se a requisição for cancelada, o array estará vazio
+                // Se a requisição for cancelada, o array estará vazio
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     // Permissão concedida
-                    Toast.makeText(
-                        this,
-                        "Notificações ativadas",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this, "Notificações ativadas", Toast.LENGTH_SHORT).show()
                 }
+                // Chama a checagem de localização aqui para garantir a sequência correta de permissões
                 checarPermissaoLocalizacao()
             }
             CODIGO_PERMISSAO_LOCALIZACAO -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (::map.isInitialized) {
-                        mostrarLocalizacaoAtual()
+                        ativarLocUser()
                     }
                 } else {
                     // Permissão negada
-                    Toast.makeText(
-                        this,
-                        "Ative a localização nas configurações para ver sua posição",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this, "Ative a localização nas configurações para ver sua posição", Toast.LENGTH_LONG).show()
                 }
             }
         }
-    }
-
-    // função auxiliar para verificar a permissão antes de tentar enviar uma notificação
-    private fun checarPermissaoNotificacao(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        }
-        return true
-    }
-
-    // Função que realiza a solicitação da permissão de notificações
-    private fun solicitarPermissaoNotificacao() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // API 33+
-            val permissao = Manifest.permission.POST_NOTIFICATIONS
-            when {
-                ContextCompat.checkSelfPermission(
-                    this,
-                    permissao
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Permissão já concedida
-                }
-                ActivityCompat.shouldShowRequestPermissionRationale(
-                    this, permissao) -> {
-                    mostrarExplicacaoPermissao()
-                }
-                else -> {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(permissao),
-                        CODIGO_PERMISSAO_NOTIFICACAO
-                    )
-                }
-            }
-        }
-    }
-
-    // Função da caixa de diálogo da permissão
-    private fun mostrarExplicacaoPermissao() {
-        AlertDialog.Builder(this)
-            .setTitle("Permissão de Notificações")
-            .setMessage("Este app precisa enviar notificações para alertar sobre mudanças no sistema de monitoramento de água.")
-            .setPositiveButton("Permitir") { _, _ ->
-                solicitarPermissaoNotificacao()
-            }
-            .setNegativeButton("Agora não", null)
-            .show()
     }
 
     // ------------ MAPA -----------
 
     // Função de setup do mapa
-    //@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-        checarPermissaoLocalizacao()
         desativarInteracoes()
-        //Log.e("LOCALIZACAO", "passou, map = $map")
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mostrarLocalizacaoAtual()
+        mostrarLocalizacaoAtual()
+        checarPermissaoLocalizacao()
+        lifecycleScope.launch {
+            viewModel.uiState.collect { uiState ->
+                uiState.principalPosto.let { posto ->
+                    map.clear()
+                    addRiskMarker(posto)
+                }
+            }
         }
+    }
 
-        addRiskMarker((application as MyApp).postoAlerta)
+    // Função que verifica a permissão de localizacao
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun checarPermissaoLocalizacao() {
+        if (::map.isInitialized) {
+            if (PermissionHelper.checarPermissaoLoc(this)) {
+                ativarLocUser()
+            } else {
+                PermissionHelper.solicitarPermissaoLoc(this)
+            }
+        }
     }
 
     // Função que desativa as interações do mapa
@@ -421,28 +278,90 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
             isTiltGesturesEnabled = false
             isMapToolbarEnabled = false
         }
+
         map.setOnMapClickListener {
             startActivity(Intent(this, MapsActivity::class.java))
         }
     }
 
-    private fun addRiskMarker(posto: PostoAlerta) {
-        //val statusRisco = findViewById<TextView>(R.id.tv_flood_risk_level_text).text.toString()
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    override fun onResume() {
+        super.onResume()
+        // Inicia as atualizações de localização apenas quando a Activity está ativa
+        if (PermissionHelper.checarPermissaoLoc(this)) {
+            locationCallback?.let { callback ->
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    callback,
+                    Looper.getMainLooper()
+                )
+            }
+        }
+    }
 
-        val icone: BitmapDescriptor = when (posto.status) {
-            0 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_no_risk)!!)
-            1 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_low_risk)!!)
-            2 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_medium_risk)!!)
-            3 -> bitmapDescriptorFromVector(getDrawable(R.drawable.ic_marker_high_risk)!!)
-            else -> bitmapDescriptorFromVector(getDrawable(R.drawable.sinal_off_de_rede)!!)
+    override fun onPause() {
+        super.onPause()
+
+        // Remove as atualizações de localização para economizar bateria
+        locationCallback?.let { callback ->
+            if (::fusedLocationClient.isInitialized) {
+                fusedLocationClient.removeLocationUpdates(callback)
+            }
+        }
+    }
+
+    // Função para verificar a permissão do acesso a localização
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun mostrarLocalizacaoAtual() {
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(lr: LocationResult) {
+                // Centraliza apenas na primeira atualização
+                lr.lastLocation?.let { location ->
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                }
+            }
+        }
+    }
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun ativarLocUser() {
+        // Esta função só é chamada se tivermos permissão
+        if (!::map.isInitialized) return
+
+        // Ativa as configurações de localização atual do GoogleMaps
+        map.isMyLocationEnabled = true
+        map.uiSettings.isMyLocationButtonEnabled = true
+
+        locationCallback?.let { callback ->
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                callback,
+                Looper.getMainLooper()
+            )
+        }
+    }
+
+    private fun addRiskMarker(posto: PostoAlerta?) {
+        val icone: BitmapDescriptor = when (posto?.status) {
+            0 -> bitmapDescriptorFromVector(AppCompatResources.getDrawable(this, R.drawable.ic_marker_no_risk)!!)
+            1 -> bitmapDescriptorFromVector(AppCompatResources.getDrawable(this, R.drawable.ic_marker_low_risk)!!)
+            2 -> bitmapDescriptorFromVector(AppCompatResources.getDrawable(this, R.drawable.ic_marker_medium_risk)!!)
+            3 -> bitmapDescriptorFromVector(AppCompatResources.getDrawable(this, R.drawable.ic_marker_high_risk)!!)
+            else -> bitmapDescriptorFromVector(AppCompatResources.getDrawable(this, R.drawable.sinal_off_de_rede)!!)
         }
 
-        map.addMarker(
-            MarkerOptions()
-                .position(posto.latLng)
+        posto?.latLng?.let { latLng ->
+            // Cria o objeto MarkerOptions
+            val markerOptions = MarkerOptions()
+                .position(latLng)
                 .icon(icone)
-        )?.also { marker ->
-            marker.tag = posto
+
+            // Passa o MarkerOptions para a função addMarker()
+            val marker = map.addMarker(markerOptions)
+
+            // O objeto Marker é usado para definir a tag
+            marker?.tag = posto
         }
     }
 
@@ -453,67 +372,5 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         val canvas = Canvas(bitmap)
         drawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)
-    }
-
-
-    /*----------Localização--------------------*/
-
-
-    // Função que verifica a permissão de localizacao
-    private fun checarPermissaoLocalizacao() {
-        val permissao = Manifest.permission.ACCESS_FINE_LOCATION
-
-        when {
-            // Verifica se já há permissão
-            ContextCompat.checkSelfPermission(this, permissao) == PackageManager.PERMISSION_GRANTED -> {
-                mostrarLocalizacaoAtual()
-            }
-
-            // Verifica se o usuário já negou uma vez
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                this, permissao) -> {
-                solicitarPermissaoLocalizacao()
-            }
-
-            // Se não há permissão
-            else -> {
-                solicitarPermissaoLocalizacao()
-            }
-
-        }
-    }
-
-    // Função para verificar a permissão do acesso a localização
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    private fun mostrarLocalizacaoAtual() {
-        // Ativa as configurações de localização atual do GoogleMaps
-        map.isMyLocationEnabled = true
-        map.uiSettings.isMyLocationButtonEnabled = true
-
-        // A cada atualização da localização, o mapa também é atualizado
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(lr: LocationResult) {
-                lr.lastLocation?.let { location ->
-                    val latLng = LatLng(location.latitude, location.longitude)
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-                }
-            }
-        }
-
-        // Realiza a atualização da localização do dispositivo em um tempo determinado
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
-        )
-    }
-
-    // Função para solicitar a permissão de localização do usuário
-    private fun solicitarPermissaoLocalizacao() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-            CODIGO_PERMISSAO_LOCALIZACAO
-        )
     }
 }
