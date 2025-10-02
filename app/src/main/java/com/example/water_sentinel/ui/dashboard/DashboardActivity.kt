@@ -111,7 +111,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         }
 
         binding.cardHumidity.setOnClickListener {
-            showHistoryDialog("percentage", "Histórico de Umidade")
+            showHistoryDialog("humidity", "Histórico de Umidade")
         }
 
         binding.cardPressure.setOnClickListener {

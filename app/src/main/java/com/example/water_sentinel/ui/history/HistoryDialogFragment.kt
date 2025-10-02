@@ -77,7 +77,7 @@ class HistoryDialogFragment : DialogFragment() {
         )
         viewModel = ViewModelProvider(this, factory)[HistoryViewModel::class.java]
 
-        val metricType = arguments?.getString(ARG_METRIC_TYPE) ?: ""
+        metricType = arguments?.getString(ARG_METRIC_TYPE) ?: ""
         val title = arguments?.getString(ARG_METRIC_TITLE) ?: "Histórico"
 
         /*val btnSeeDetails: Button = view.findViewById(R.id.btn_see_details)
