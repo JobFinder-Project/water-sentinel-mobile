@@ -1,22 +1,40 @@
 *.iml
-.gradle
+.gradle/
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/.idea/
 .DS_Store
-/build
-/.kotlin
-/captures
-.externalNativeBuild
-.cxx
+/build/
+/.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
 local.properties
 secrets.properties
 
+# IntelliJ
+.idea/
+*.iws
+*.ipr
+*.iml
+
+# VSCode
+.vscode/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Backup & swap
+*~
+*.swp
+*.swo
+
+# Others
 .gradle/
 build/
 captures/
 .DS_Store
+
