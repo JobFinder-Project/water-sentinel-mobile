@@ -63,7 +63,15 @@
     <string name="message_medium_risk">Atenção! Risco de alagamento. Esteja preparado.</string>
     <string name="message_high_risk">PERIGO! Enchente iminente. Procure um local seguro IMEDIATAMENTE!</string>
 
-    <!-- Placeholders para valores -->
+    <!-- Placeholders para valores (Dashboard)-->
+    <string name="valor_status">%1$s</string>
+    <string name="valor_risco">%1$d%%</string>
+    <string name="valor_umidade">%1$d%%</string>
+    <string name="valor_temp">%1$.1f°C</string>
+    <string name="valor_volume">%1$.0f mm</string>
+    <string name="valor_pressao">%1$d hPa</string>
+
+    <!-- Placeholders para valores (Bottom Sheet) -->
     <string name="status_com_valor">Status: %1$s</string>
     <string name="risco_com_valor">Risco: %1$d%%</string>
     <string name="umidade_com_valor">Umidade: %1$d%%</string>

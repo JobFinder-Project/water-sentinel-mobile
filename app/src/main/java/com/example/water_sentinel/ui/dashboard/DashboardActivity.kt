@@ -135,11 +135,11 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
                     // Lógica para mostrar o status do sistema (ativo/inativo)
                     if (posto.ativo) {
                         binding.tvWeatherDesc.text = AppUtils.getStatusSistemaText(this@DashboardActivity, posto.ativo)
-                        binding.tvTemperature.text = getString(R.string.temperatura_com_valor, posto.temperatura)
-                        binding.tvHumidity.text = getString(R.string.umidade_com_valor, posto.umidade)
-                        binding.tvPressure.text = getString(R.string.pressao_com_valor, posto.pressao)
-                        binding.tvVolume.text = getString(R.string.volume_com_valor, posto.volume)
-                        binding.tvFloodPercent.text = getString(R.string.risco_com_valor, posto.riscoPorcentagem)
+                        binding.tvTemperature.text = getString(R.string.valor_temp, posto.temperatura)
+                        binding.tvHumidity.text = getString(R.string.valor_umidade, posto.umidade)
+                        binding.tvPressure.text = getString(R.string.valor_pressao, posto.pressao)
+                        binding.tvVolume.text = getString(R.string.valor_volume, posto.volume)
+                        binding.tvFloodPercent.text = getString(R.string.valor_risco, posto.riscoPorcentagem)
 
                         // Estilização do card de risco
                         val corTexto = ContextCompat.getColor(
@@ -187,6 +187,7 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         binding.tvPressure.text = "---"
         binding.tvVolume.text = "---"
         binding.tvFloodPercent.text = "---"
+        binding.tvFloodRiskLevelText.text = "---"
     }
 
     // ------------ DIALOG DE HISTÓRICO -----------
