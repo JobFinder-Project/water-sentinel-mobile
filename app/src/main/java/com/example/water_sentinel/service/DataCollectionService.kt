@@ -72,7 +72,7 @@ class DataCollectionService: LifecycleService() {
                 }
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     private fun handleNotification(nivelAtual: Int?) {

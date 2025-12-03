@@ -316,6 +316,16 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Cria o Intent para o DataCollectionService
+        val intent = Intent(this, DataCollectionService::class.java)
+
+        // Chama stopService para parar o serviço Foreground
+        stopService(intent)
+    }
+
     // Função para verificar a permissão do acesso a localização
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun mostrarLocalizacaoAtual() {
