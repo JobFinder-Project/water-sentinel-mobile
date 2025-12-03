@@ -21,6 +21,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.water_sentinel.MyApp
+import com.example.water_sentinel.service.DataCollectionService
 import com.example.water_sentinel.data.remote.FirebaseDataSource
 import com.example.water_sentinel.data.repository.DataRepository
 import com.example.water_sentinel.databinding.ActivityDashboardBinding
@@ -91,6 +92,10 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         // Configura os listeners e o observador do ViewModel
         setupClickListeners()
         observeViewModelState()
+
+        // Inicia o serviço de coleta de dados em segundo plano
+        val intent = Intent(this, DataCollectionService::class.java)
+        ContextCompat.startForegroundService(this, intent)
 
         // Inicializa o cliente de localização e o mapa
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
