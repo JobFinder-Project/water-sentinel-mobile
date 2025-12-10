@@ -9,10 +9,14 @@
     <string name="subtitulo">Monitoramento de Alagamentos em Itacoatiara</string>
     <string name="bemVindo">Bem-vindo!</string>
 
+    <!-- Status do sistema -->
+    <string name="sistema_ativo">Sistema ativo</string>
+    <string name="sistema_inativo">Sistema inativo</string>
+
     <!-- 2° tela -->
 
     <string name="itacoatiara">Itacoatiara</string>
-    <string name="sistema_inativo">----</string>
+    <string name="sistema_off">----</string>
     <string name="sem_temperatura">--°</string>
     <string name="risco_de_alagamento">Risco de Alagamento</string>
     <string name="sem_risco_alagamento">--%</string>
@@ -58,4 +62,27 @@
     <string name="message_low_risk">Chuva detectada. Monitore as condições.</string>
     <string name="message_medium_risk">Atenção! Risco de alagamento. Esteja preparado.</string>
     <string name="message_high_risk">PERIGO! Enchente iminente. Procure um local seguro IMEDIATAMENTE!</string>
+
+    <!-- Placeholders para valores (Dashboard)-->
+    <string name="valor_status">%1$s</string>
+    <string name="valor_risco">%1$d%%</string>
+    <string name="valor_umidade">%1$d%%</string>
+    <string name="valor_temp">%1$.1f°C</string>
+    <string name="valor_volume">%1$.0f mm</string>
+    <string name="valor_pressao">%1$d hPa</string>
+
+    <!-- Placeholders para valores (Bottom Sheet) -->
+    <string name="status_com_valor">Status: %1$s</string>
+    <string name="risco_com_valor">Risco: %1$d%%</string>
+    <string name="umidade_com_valor">Umidade: %1$d%%</string>
+    <string name="temperatura_com_valor">Temperatura: %1$.1f°C</string>
+    <string name="volume_com_valor">Volume: %1$.2f m</string>
+    <string name="pressao_com_valor">Pressão: %1$d hPa</string>
+    <string name="coordenadas_com_valor">Lat: %1$.5f Long: %2$.5f</string>
+
+    <string name="risco_sem_valor">Risco: ---</string>
+    <string name="umidade_sem_valor">Umidade: ---</string>
+    <string name="temperatura_sem_valor">Temperatura: ---</string>
+    <string name="volume_sem_valor">Volume: ---</string>
+    <string name="pressao_sem_valor">Pressão: ---</string>
 </resources>

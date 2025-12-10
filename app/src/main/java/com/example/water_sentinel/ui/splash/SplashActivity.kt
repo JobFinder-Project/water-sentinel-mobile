@@ -1,14 +1,14 @@
-package com.example.water_sentinel
+package com.example.water_sentinel.ui.splash
 
 import android.content.Intent
-//import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-//import androidx.core.view.ViewCompat
-//import androidx.core.view.WindowInsetsCompat
+import com.example.water_sentinel.R
+import com.example.water_sentinel.ui.welcome.WelcomeActivity
 
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,10 +18,11 @@ class SplashActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, WelcomeActivity::class.java)
+        lifecycleScope.launch {
+            delay(1000L)
+            val intent = Intent(this@SplashActivity, WelcomeActivity::class.java)
             startActivity(intent)
             finish()
-        }, 1000)
+        }
     }
 }

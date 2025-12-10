@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import android.app.Application
+import com.example.water_sentinel.ui.dashboard.DashboardActivity
 
 /*class App : Application() {
 
@@ -23,6 +24,7 @@ import android.app.Application
 
 object NotificationHelper {
 
+    const val FLOOD_ALERT_NOTIFICATION_ID = 101
     const val CHANNEL_ID = "water-sentinel-channel"
     private var notificationIdCounter = 0
 
@@ -51,7 +53,7 @@ object NotificationHelper {
         message: String
     ) {
 
-        val notificationId = notificationIdCounter++
+        //val notificationId = notificationIdCounter++
 
         // Intent para abrir o app ao clicar na notificação
         val intent = Intent(context, DashboardActivity::class.java).apply {
@@ -62,7 +64,7 @@ object NotificationHelper {
         } else {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, notificationId /* requestCode precisa ser único se o intent for diferente */, intent, pendingIntentFlags)
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, FLOOD_ALERT_NOTIFICATION_ID /* requestCode precisa ser único se o intent for diferente */, intent, pendingIntentFlags)
 
         val priority = when (riskLevel) {
             "Risco Alto" -> NotificationCompat.PRIORITY_HIGH
@@ -82,8 +84,8 @@ object NotificationHelper {
 
         with(NotificationManagerCompat.from(context)) {
             try {
-                notify(notificationId, builder.build())
-                Log.d("NotificationHelper", "Notificação enviada: ID $notificationId, Título: $riskLevel")
+                notify(FLOOD_ALERT_NOTIFICATION_ID, builder.build())
+                Log.d("NotificationHelper", "Notificação enviada: ID $FLOOD_ALERT_NOTIFICATION_ID, Título: $riskLevel")
             } catch (e: SecurityException) {
                 Log.e("NotificationHelper", "Erro de segurança ao enviar notificação. Permissão POST_NOTIFICATIONS está faltando?", e)
                 // Este catch é uma segurança extra, a checagem de permissão acima deveria prevenir isso.

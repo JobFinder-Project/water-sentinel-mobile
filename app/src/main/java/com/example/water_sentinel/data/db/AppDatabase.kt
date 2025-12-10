@@ -1,4 +1,4 @@
-package com.example.water_sentinel.db
+package com.example.water_sentinel.data.db
 
 import android.content.Context
 import androidx.room.Database

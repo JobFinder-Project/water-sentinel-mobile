@@ -177,14 +177,12 @@
             <LinearLayout
                 android:id="@+id/card_humidity"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
+                android:layout_height="match_parent" android:layout_marginEnd="4dp"
                 android:layout_weight="1"
                 android:background="@drawable/item_background"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
+                android:gravity="center" android:orientation="vertical"
                 android:padding="16dp">
 
                 <ImageView
@@ -203,7 +201,7 @@
                     android:layout_marginBottom="4dp"
                     android:text="@string/sem_dados"
                     android:textColor="@color/white"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     app:autoSizeTextType="uniform" />
 
@@ -219,17 +217,14 @@
             <LinearLayout
                 android:id="@+id/card_pressure"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_height="match_parent" android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:padding="16dp"
+                android:gravity="center" android:padding="16dp"
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/item_background"
                 android:clickable="true"
-                android:focusable="true"
-                app:autoSizeTextType="uniform">
+                android:focusable="true">
 
                 <ImageView
                     android:id="@+id/img_pressure_icon"
@@ -242,14 +237,13 @@
 
                 <TextView
                     android:id="@+id/tv_pressure"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/sem_dados"
+                    android:gravity="center" android:text="@string/sem_dados"
                     android:textColor="@color/white"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"
-                    app:autoSizeTextType="uniform"
                     android:maxLines="1"
                     android:singleLine="true"
                     />
@@ -264,20 +258,17 @@
 
             </LinearLayout>
 
-            <!-- essa é a parte da precipitação, bicho do mato-->
+            <!-- card de volume-->
             <LinearLayout
                 android:id="@+id/card_flood_level"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_height="match_parent" android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:padding="16dp"
+                android:gravity="center" android:padding="16dp"
                 android:layout_marginStart="4dp"
                 android:background="@drawable/item_background"
                 android:clickable="true"
-                android:focusable="true"
-                app:autoSizeTextType="uniform">
+                android:focusable="true">
 
                 <ImageView
                     android:id="@+id/img_precipitation_icon"
@@ -290,11 +281,11 @@
 
                 <TextView
                     android:id="@+id/tv_volume"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/sem_dados"
+                    android:gravity="center" android:text="@string/sem_dados"
                     android:textColor="@color/white"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"/>
 
