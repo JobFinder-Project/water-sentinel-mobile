@@ -85,14 +85,22 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Solicita as permissões necessárias
-        PermissionHelper.solicitarPermissaoNotif(this)
-        PermissionHelper.solicitarPermissaoLoc(this)
-
         // Configura os listeners e o observador do ViewModel
         setupClickListeners()
         observeViewModelState()
 
+        // Solicita as permissões necessárias de forma sequencial
+        if (!PermissionHelper.checarPermissaoNotif(this)) {
+            PermissionHelper.solicitarPermissaoNotif(this)
+        } else if (!PermissionHelper.checarPermissaoLoc(this)) {
+            PermissionHelper.solicitarPermissaoLoc(this)
+        } else {
+            // Se todas as permissões já estão concedidas, inicializa o app
+            initApp()
+        }
+    }
+
+    private fun initApp() {
         // Inicia o serviço de coleta de dados em segundo plano
         val intent = Intent(this, DataCollectionService::class.java)
         ContextCompat.startForegroundService(this, intent)
@@ -101,7 +109,6 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
     }
 
     private fun setupClickListeners() {
@@ -218,27 +225,29 @@ class DashboardActivity : AppCompatActivity(), OnMapReadyCallback, HistoryDialog
     // Função para tratar a resposta da solicitação de permissao
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         when (requestCode) {
             CODIGO_PERMISSAO_NOTIFICACAO -> {
-                // Se a requisição for cancelada, o array estará vazio
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // Permissão concedida
-                    Toast.makeText(this, "Notificações ativadas", Toast.LENGTH_SHORT).show()
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permissão de notificação concedida, agora solicita a de localização
+                    PermissionHelper.solicitarPermissaoLoc(this)
+                } else {
+                    // O usuário negou a permissão de notificação.
+                    Toast.makeText(this, "Permissão de notificação necessária para alertas.", Toast.LENGTH_LONG).show()
+                    // Mesmo sem a permissão, tentamos solicitar a de localização para o mapa funcionar
+                    PermissionHelper.solicitarPermissaoLoc(this)
                 }
-                // Chama a checagem de localização aqui para garantir a sequência correta de permissões
-                checarPermissaoLocalizacao()
             }
             CODIGO_PERMISSAO_LOCALIZACAO -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (::map.isInitialized) {
-                        ativarLocUser()
-                    }
+                    // Permissão de localização concedida, inicializa o app
+                    initApp()
                 } else {
-                    // Permissão negada
-                    Toast.makeText(this, "Ative a localização nas configurações para ver sua posição", Toast.LENGTH_LONG).show()
+                    // O usuário negou a permissão de localização.
+                    Toast.makeText(this, "Permissão de localização necessária para o mapa.", Toast.LENGTH_LONG).show()
+                    // O app pode continuar sem a localização, mas com funcionalidades limitadas.
+                    // Você pode querer inicializar partes do app que não dependem de localização aqui.
                 }
             }
         }
